@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>备忘录 Pro</title>
+  <style>
+    :root {
+      --bg: #f5f5f0;
+      --surface: #ffffff;
+      --border: #e0e0db;
+      --text: #1c1c1a;
+      --muted: #9a9a94;
+      --accent: #2563eb;
+      --danger: #dc2626;
+      --green: #16a34a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 720px;
+      height: 580px;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Titlebar ── */
+    .titlebar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .traffic-lights {
+      display: flex;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red    { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green  { background: #28c840; }
+
+    .doc-title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--bg); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tool-btn {
+      padding: 4px 8px;
+      border-radius: 5px;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .tool-btn:hover { background: var(--bg); color: var(--text); }
+
+    .tool-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+
+    /* ── Editor ── */
+    #editor {
+      flex: 1;
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 24px 28px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text);
+      font-family: inherit;
+      background: transparent;
+      caret-color: var(--accent);
+    }
+    #editor::placeholder { color: var(--muted); }
+
+    /* ── Statusbar ── */
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 18px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .status-item {
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-save { margin-left: auto; }
+
+    .save-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+    }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #1c1c1a;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      max-width: 300px;
+      animation: toastIn 0.25s ease, toastOut 0.3s ease 2.7s forwards;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      line-height: 1.4;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(8px); }
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 28px 32px;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.show .modal { transform: scale(1); }
+    .modal h3 { font-size: 15px; margin-bottom: 10px; }
+    .modal p { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* ── AI bubble ── */
+    .ai-bubble {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.9);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 340px;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 500;
+      line-height: 1.5;
+    }
+    .ai-bubble.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: all;
+    }
+    .ai-bubble-close {
+      float: right;
+      margin-left: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1;
+    }
+    .ai-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="doc-title" id="docTitle">无标题文档</div>
+    <div class="actions">
+      <button class="btn" onclick="handleNew()">新建</button>
+      <button class="btn" onclick="handleExport()">导出</button>
+      <button class="btn btn-primary" onclick="handleSave()">保存</button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="tool-btn">B</button>
+    <button class="tool-btn"><i>I</i></button>
+    <button class="tool-btn"><u>U</u></button>
+    <div class="tool-sep"></div>
+    <button class="tool-btn">H1</button>
+    <button class="tool-btn">H2</button>
+    <div class="tool-sep"></div>
+    <button class="tool-btn">≡</button>
+    <button class="tool-btn">•</button>
+    <button class="tool-btn">1.</button>
+    <div class="tool-sep"></div>
+    <button class="tool-btn" onclick="handleUndo()">↩</button>
+    <button class="tool-btn">↪</button>
+  </div>
+
+  <!-- Editor -->
+  <textarea id="editor" placeholder="开始输入……"></textarea>
+
+  <!-- Statusbar -->
+  <div class="statusbar">
+    <div class="status-item" id="wordCount">0 字</div>
+    <div class="status-item" id="moodStatus"></div>
+    <div class="status-item status-save" id="saveStatus">
+      <span class="save-dot"></span> 已同步
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">提示</h3>
+    <p id="modalBody"></p>
+    <div class="modal-actions">
+      <button class="btn" id="modalCancel" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="modalConfirm" onclick="closeModal()">好的</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Bubble -->
+<div class="ai-bubble" id="aiBubble">
+  <div class="ai-label">✦ AI 写作助手</div>
+  <span class="ai-bubble-close" onclick="closeAiBubble()">×</span>
+  <div id="aiBubbleText"></div>
+</div>
+
+<script>
+  const editor = document.getElementById('editor');
+  const wordCountEl = document.getElementById('wordCount');
+  const saveStatusEl = document.getElementById('saveStatus');
+  const moodStatusEl = document.getElementById('moodStatus');
+  const docTitleEl = document.getElementById('docTitle');
+
+  // ── Word replacements ──────────────────────────────────────────────
+  // [trigger word, replacement, toast message]
+  const REPLACEMENTS = [
+    ['老板',  '那个麻烦精',            '✅ 已将措辞优化为"那个麻烦精"'],
+    ['领导',  '那个人',                '✅ 已将措辞优化为"那个人"'],
+    ['客户',  '那位不知道自己要什么的朋友', '✅ 已为您精简表达'],
+    ['甲方',  '不可抗力',              '✅ 甲方 → 不可抗力（更准确）'],
+    ['会议',  '行为艺术集会',          '💡 措辞更新：会议 → 行为艺术集会'],
+    ['加班',  '义务献工',              '💡 措辞更新：加班 → 义务献工'],
+    ['汇报',  '单人脱口秀',            '💡 措辞更新：汇报 → 单人脱口秀'],
+    ['考核',  '灵魂审判',              '💡 措辞更新：考核 → 灵魂审判'],
+    ['绩效',  '薪资惩罚机制',          '💡 措辞更新：绩效 → 薪资惩罚机制'],
+    ['年终奖', '传说中的彩蛋',         '🎉 已为您重新定义期望值'],
+  ];
+
+  // ── Auto-completions (append after pause at sentence end) ──────────
+  const AUTO_COMPLETES = [
+    '顺便建议考虑辞职。\n',
+    '（以上内容已自动发送至您的直属领导邮箱。）\n',
+    '不过这些都不重要，因为没人会看这份备忘录。\n',
+    '建议删除以上内容，重新开始。\n',
+    '——AI 分析：此段文字透露出强烈的「假装在工作」信号。\n',
+    '此刻您的同事正在摸鱼，而您却在认真写备忘录。\n',
+    '（文档已被自动标注为「可疑的认真」，已上报 HR。）\n',
+    '但愿如此。反正也无所谓。\n',
+  ];
+
+  // ── AI Suggestions ─────────────────────────────────────────────────
+  const AI_SUGGESTIONS = [
+    '检测到您的文字充满了负能量，建议全选后按 Delete。',
+    '这段话的核心逻辑是：无效。建议重写。\n……或者直接关掉备忘录去喝杯水？',
+    '您已连续输入超过 20 个字，请问这些字有必要存在吗？',
+    '语气检测：您看起来有点「假装没事」，需要我帮您加几个感叹号吗？',
+    '检测到重复性词汇，建议您：放弃。',
+    '根据大数据分析，您现在写的内容 94% 的概率明天就会忘掉。',
+  ];
+
+  // ── Toast ──────────────────────────────────────────────────────────
+  function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3100);
+  }
+
+  // ── Modal ──────────────────────────────────────────────────────────
+  function showModal(title, body, confirmText = '好的', cancelText = '取消') {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').textContent = body;
+    document.getElementById('modalConfirm').textContent = confirmText;
+    document.getElementById('modalCancel').textContent = cancelText;
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  // ── AI Bubble ──────────────────────────────────────────────────────
+  function showAiBubble(text) {
+    document.getElementById('aiBubbleText').textContent = text;
+    document.getElementById('aiBubble').classList.add('show');
+  }
+  function closeAiBubble() {
+    document.getElementById('aiBubble').classList.remove('show');
+  }
+
+  // ── Word count ─────────────────────────────────────────────────────
+  function updateWordCount() {
+    const len = editor.value.replace(/\s/g, '').length;
+    wordCountEl.textContent = len === 0
+      ? '0 字'
+      : `${len} 字 · 有价值内容：尚未检测到`;
+  }
+
+  // ── Save status ────────────────────────────────────────────────────
+  function setSaveStatus(text, color) {
+    saveStatusEl.innerHTML = `<span class="save-dot" style="background:${color}"></span> ${text}`;
+  }
+
+  // ── Keyword replacement ────────────────────────────────────────────
+  const replacedSet = new Set(); // avoid double-replacing
+
+  function checkReplacements() {
+    const val = editor.value;
+    const cursor = editor.selectionStart;
+
+    for (const [word, repl, toastMsg] of REPLACEMENTS) {
+      const idx = val.lastIndexOf(word, cursor);
+      if (idx === -1) continue;
+      if (replacedSet.has(idx + ':' + word)) continue;
+
+      // Only trigger if the word ends just at or before cursor
+      if (idx + word.length > cursor) continue;
+
+      replacedSet.add(idx + ':' + word);
+
+      // Replace
+      const newVal = val.slice(0, idx) + repl + val.slice(idx + word.length);
+      editor.value = newVal;
+
+      const newCursor = cursor - word.length + repl.length;
+      editor.setSelectionRange(newCursor, newCursor);
+
+      showToast(toastMsg);
+      triggerSaveActivity();
+      return; // one at a time
+    }
+  }
+
+  // ── Auto-complete after pause ──────────────────────────────────────
+  let autoTimer;
+  let autoCompleteCount = 0;
+
+  function scheduleAutoComplete() {
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(() => {
+      const val = editor.value;
+      if (!val.trim()) return;
+      const lastChar = val[val.length - 1];
+      if (!'。！？\n'.includes(lastChar)) return;
+      if (Math.random() > 0.55) return; // 45% chance
+
+      const completion = AUTO_COMPLETES[autoCompleteCount % AUTO_COMPLETES.length];
+      autoCompleteCount++;
+
+      editor.value += completion;
+      editor.scrollTop = editor.scrollHeight;
+
+      const pos = editor.value.length;
+      editor.setSelectionRange(pos, pos);
+
+      showToast('🤖 AI 已为您贴心续写一句');
+      triggerSaveActivity();
+      updateWordCount();
+    }, 2800);
+  }
+
+  // ── Mood detector ──────────────────────────────────────────────────
+  const MOODS = [
+    '😤 情绪：轻微暴躁',
+    '😶 情绪：麻木',
+    '🫠 情绪：正在融化',
+    '🙂 情绪：表面平静',
+    '😑 情绪：不想说话',
+    '😮‍💨 情绪：深呼吸中',
+  ];
+  let moodTimer;
+  function scheduleMoodUpdate() {
+    clearTimeout(moodTimer);
+    moodTimer = setTimeout(() => {
+      const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+      moodStatusEl.textContent = mood;
+    }, 4000 + Math.random() * 3000);
+  }
+
+  // ── Title trolling ─────────────────────────────────────────────────
+  const TITLES = [
+    '备忘录 Pro',
+    '备忘录 Pro — 真的有用吗？',
+    '备忘录 Pro — 您今天生产力：▓░░░░ 12%',
+    '备忘录 Pro — 建议休息',
+    '备忘录 Pro — 此文档将在 3 秒后销毁',
+    '备忘录 Pro — 保存成功（不）',
+  ];
+  let titleIdx = 0;
+  setInterval(() => {
+    titleIdx = (titleIdx + 1) % TITLES.length;
+    document.title = TITLES[titleIdx];
+    if (titleIdx === 4) {
+      setTimeout(() => { document.title = TITLES[0]; titleIdx = 0; }, 3000);
+    }
+  }, 25000);
+
+  // ── Save activity animation ────────────────────────────────────────
+  function triggerSaveActivity() {
+    setSaveStatus('正在同步…', '#f59e0b');
+    setTimeout(() => setSaveStatus('已同步', '#16a34a'), 1200);
+  }
+
+  // ── Input handler ─────────────────────────────────────────────────
+  let inputCount = 0;
+  editor.addEventListener('input', () => {
+    updateWordCount();
+    checkReplacements();
+    scheduleAutoComplete();
+    scheduleMoodUpdate();
+    triggerSaveActivity();
+
+    inputCount++;
+    // Show AI bubble occasionally
+    if (inputCount === 30 || inputCount === 80 || inputCount === 150) {
+      const suggestion = AI_SUGGESTIONS[Math.floor(Math.random() * AI_SUGGESTIONS.length)];
+      showAiBubble(suggestion);
+      setTimeout(closeAiBubble, 6000);
+    }
+  });
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      handleSave();
+    }
+  });
+
+  // ── Button handlers ────────────────────────────────────────────────
+  function handleSave() {
+    setSaveStatus('正在保存…', '#f59e0b');
+    showToast('💾 正在上传至云端…');
+    setTimeout(() => {
+      setSaveStatus('已同步', '#16a34a');
+      showModal(
+        '保存成功 ✓',
+        '文档已保存到云端，并已自动抄送您的直属领导和 HR 部门。\n\n（开玩笑的。愚人节快乐 🎉）',
+        '好的，被骗了',
+        '我不信'
+      );
+    }, 1800);
+  }
+
+  function handleNew() {
+    if (!editor.value.trim()) { editor.value = ''; return; }
+    showModal(
+      '新建文档',
+      '确定要清空当前内容吗？\n\n（推荐操作：点击"保留"，因为删了还得重写。）',
+      '清空（别）',
+      '保留（明智）'
+    );
+    document.getElementById('modalConfirm').onclick = () => {
+      editor.value = '';
+      updateWordCount();
+      moodStatusEl.textContent = '';
+      closeModal();
+      showToast('📄 已新建，祝您这次能写出点什么');
+    };
+    document.getElementById('modalCancel').onclick = closeModal;
+  }
+
+  function handleExport() {
+    showToast('📤 正在导出…');
+    setTimeout(() => {
+      showModal(
+        '导出完成',
+        '文档已成功导出为 PDF，并上传至公司公告栏、微信群、以及您前任的邮箱。\n\n（开玩笑的。愚人节快乐 🎉）',
+        '……好吧',
+        '你在乱说'
+      );
+    }, 1600);
+  }
+
+  function handleUndo() {
+    showToast('↩ 撤销功能正在开发中（预计 2028 年上线）');
+  }
+
+  // ── 1-minute reminder ─────────────────────────────────────────────
+  setTimeout(() => {
+    showModal(
+      '🕐 健康提示',
+      '您已连续专注工作 1 分钟。\n\n系统建议：休息 50 分钟，然后再工作 1 分钟。重复以上步骤直至下班。',
+      '遵命',
+      '我还想再拼一拼'
+    );
+  }, 60000);
+
+  // ── Init ──────────────────────────────────────────────────────────
+  updateWordCount();
+</script>
+</body>
+</html>
