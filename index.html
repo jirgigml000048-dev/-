@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plant Instinct · 植觉</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#172f28",
+              "primary-container": "#2d453e",
+              "primary-fixed": "#cde9df",
+              "primary-fixed-dim": "#b1ccc3",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#98b2a9",
+              "on-primary-fixed": "#07201a",
+              "on-primary-fixed-variant": "#334c44",
+              "secondary": "#546252",
+              "secondary-container": "#d5e4cf",
+              "secondary-fixed": "#d8e7d2",
+              "secondary-fixed-dim": "#bccbb7",
+              "on-secondary": "#ffffff",
+              "on-secondary-container": "#586656",
+              "on-secondary-fixed": "#121e12",
+              "on-secondary-fixed-variant": "#3d4a3b",
+              "tertiary": "#352819",
+              "tertiary-container": "#4c3e2d",
+              "tertiary-fixed": "#f5dfc7",
+              "tertiary-fixed-dim": "#d8c3ac",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-container": "#bda993",
+              "on-tertiary-fixed": "#25190b",
+              "on-tertiary-fixed-variant": "#534433",
+              "surface": "#fbf9f4",
+              "surface-dim": "#dbdad5",
+              "surface-bright": "#fbf9f4",
+              "surface-variant": "#e4e2dd",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f5f3ee",
+              "surface-container": "#f0eee9",
+              "surface-container-high": "#eae8e3",
+              "surface-container-highest": "#e4e2dd",
+              "surface-tint": "#4b635c",
+              "on-surface": "#1b1c19",
+              "on-surface-variant": "#424846",
+              "background": "#fbf9f4",
+              "on-background": "#1b1c19",
+              "outline": "#727875",
+              "outline-variant": "#c2c8c4",
+              "inverse-surface": "#30312e",
+              "inverse-on-surface": "#f2f1ec",
+              "inverse-primary": "#b1ccc3",
+              "error": "#ba1a1a",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "on-error-container": "#93000a",
+            },
+            borderRadius: {
+              "DEFAULT": "1rem",
+              "lg": "2rem",
+              "xl": "3rem",
+              "full": "9999px",
+            },
+            fontFamily: {
+              "headline": ["Noto Serif SC", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        user-select: none;
+      }
+      body { font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; }
+      h1, h2, h3 { font-family: 'Noto Serif SC', serif; }
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .animate-spin-slow { animation: spin-slow 2s linear infinite; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "clsx": "https://esm.sh/clsx@^2.1.1",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "file-saver": "https://esm.sh/file-saver@^2.0.5",
+    "html-to-image": "https://esm.sh/html-to-image@^1.11.13",
+    "jszip": "https://esm.sh/jszip@^3.10.1"
+  }
+}
+</script>
+</head>
+  <body class="bg-surface text-on-surface min-h-screen">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
