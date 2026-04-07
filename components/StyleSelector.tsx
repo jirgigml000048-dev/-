@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { FlowerStyle, FlowerOccasion, BouquetSize, StyleSelections } from '../types';
+import { FlowerStyle, FlowerOccasion, BouquetSize, FlowerColor, MainFlower, StyleSelections } from '../types';
 import { STYLE_COVER_IMAGES } from '../constants/flowers';
 
 const STYLES: FlowerStyle[] = ['现代简约', '浪漫唯美', '自然田园', '日式侘寂', '复古典雅'];
 const OCCASIONS: FlowerOccasion[] = ['爱情', '友情', '节日', '日常', '悼念'];
 const SIZES: BouquetSize[] = ['小型', '中型', '大型'];
+const COLORS: FlowerColor[] = ['白色系', '粉色系', '红色系', '紫色系', '黄橙系', '混色'];
+const MAIN_FLOWERS: MainFlower[] = ['玫瑰', '牡丹', '向日葵', '绣球', '郁金香', '雏菊', '满天星'];
 
 const STYLE_EN: Record<FlowerStyle, string> = {
   '现代简约': 'Modern',
@@ -37,6 +39,15 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
   const [style, setStyle] = useState<FlowerStyle>('浪漫唯美');
   const [occasion, setOccasion] = useState<FlowerOccasion>('爱情');
   const [size, setSize] = useState<BouquetSize>('中型');
+  const [color, setColor] = useState<FlowerColor | undefined>(undefined);
+  const [mainFlower, setMainFlower] = useState<MainFlower | undefined>(undefined);
+
+  const chipClass = (active: boolean) =>
+    `px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
+      active
+        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+        : 'bg-surface-container text-secondary hover:bg-surface-container-high'
+    }`;
 
   return (
     <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">
@@ -78,21 +89,11 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         <div className="space-y-4">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">风格</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">
-              Style
-            </span>
+            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Style</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             {STYLES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setStyle(s)}
-                className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                  style === s
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-                }`}
-              >
+              <button key={s} onClick={() => setStyle(s)} className={chipClass(style === s)}>
                 {STYLE_EN[s]}
               </button>
             ))}
@@ -103,21 +104,11 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         <div className="space-y-4">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">场合</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">
-              Occasion
-            </span>
+            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Occasion</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             {OCCASIONS.map((o) => (
-              <button
-                key={o}
-                onClick={() => setOccasion(o)}
-                className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                  occasion === o
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-                }`}
-              >
+              <button key={o} onClick={() => setOccasion(o)} className={chipClass(occasion === o)}>
                 {OCCASION_EN[o]}
               </button>
             ))}
@@ -128,22 +119,48 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         <div className="space-y-4">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">大小</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">
-              Proportions
-            </span>
+            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Proportions</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             {SIZES.map((sz) => (
-              <button
-                key={sz}
-                onClick={() => setSize(sz)}
-                className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                  size === sz
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-                }`}
-              >
+              <button key={sz} onClick={() => setSize(sz)} className={chipClass(size === sz)}>
                 {SIZE_EN[sz]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Color (optional) */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-end">
+            <h4 className="font-headline text-2xl text-primary">颜色系</h4>
+            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Color</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
+            <button onClick={() => setColor(undefined)} className={chipClass(color === undefined)}>
+              全部
+            </button>
+            {COLORS.map((c) => (
+              <button key={c} onClick={() => setColor(c)} className={chipClass(color === c)}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Flower (optional) */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-end">
+            <h4 className="font-headline text-2xl text-primary">主花</h4>
+            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Flower</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
+            <button onClick={() => setMainFlower(undefined)} className={chipClass(mainFlower === undefined)}>
+              全部
+            </button>
+            {MAIN_FLOWERS.map((f) => (
+              <button key={f} onClick={() => setMainFlower(f)} className={chipClass(mainFlower === f)}>
+                {f}
               </button>
             ))}
           </div>
@@ -153,7 +170,7 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
       {/* Action Button */}
       <div className="mt-16">
         <button
-          onClick={() => onConfirm({ style, occasion, size })}
+          onClick={() => onConfirm({ style, occasion, size, color, mainFlower })}
           disabled={isLoading}
           className="w-full bg-primary text-on-primary font-headline text-lg py-5 rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-3 disabled:opacity-60"
         >
