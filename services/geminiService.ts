@@ -54,7 +54,7 @@ export async function generateBouquetRecommendation(
 ${PURCHASE_LIST_SCHEMA}`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.0-flash-lite',
     contents: prompt,
   });
 
@@ -85,7 +85,7 @@ export async function identifyFlowersFromImage(
 ${PURCHASE_LIST_SCHEMA}`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.0-flash-lite',
     contents: [
       {
         role: 'user',
