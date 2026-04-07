@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FlowerStyle, FlowerOccasion, BouquetSize, StyleSelections } from '../types';
-import { getUnsplashUrl, BOUQUET_PHOTO_IDS } from '../constants/flowers';
+import { STYLE_COVER_IMAGES } from '../constants/flowers';
 
 const STYLES: FlowerStyle[] = ['现代简约', '浪漫唯美', '自然田园', '日式侘寂', '复古典雅'];
 const OCCASIONS: FlowerOccasion[] = ['爱情', '友情', '节日', '日常', '悼念'];
@@ -38,9 +38,6 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
   const [occasion, setOccasion] = useState<FlowerOccasion>('爱情');
   const [size, setSize] = useState<BouquetSize>('中型');
 
-  // Cover image changes with selected style
-  const coverPhotoId = BOUQUET_PHOTO_IDS[style][0];
-
   return (
     <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">
       {/* Hero Section */}
@@ -59,8 +56,8 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
       {/* Cover Preview */}
       <div className="relative w-full mb-12 h-64 rounded-xl overflow-hidden group">
         <img
-          key={coverPhotoId}
-          src={getUnsplashUrl(coverPhotoId, 800)}
+          key={style}
+          src={STYLE_COVER_IMAGES[style]}
           alt={style}
           className="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700"
         />

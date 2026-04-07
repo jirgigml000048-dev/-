@@ -79,10 +79,14 @@ export async function identifyFlowersFromImage(
 
 export async function annotateFlowersInImage(
   base64: string,
-  mimeType: string
+  mimeType: string,
+  flowerNames?: string[]
 ): Promise<FlowerAnnotation[]> {
   const ai = getClient();
-  const prompt = `识别图中每种花卉/植物的位置，每种一个框。label用简短中文花名。box_2d格式[y_min,x_min,y_max,x_max]范围0-1000。只返回JSON数组：[{"label":"花名","box_2d":[y1,x1,y2,x2]}]`;
+  const focus = flowerNames && flowerNames.length > 0
+    ? `只标注以下花卉（每种最多一个框，不重复）：${flowerNames.join('、')}。`
+    : '识别图中每种花卉/植物。';
+  const prompt = `${focus}每种一个框，label用简短中文花名。box_2d格式[y_min,x_min,y_max,x_max]范围0-1000。只返回JSON数组：[{"label":"花名","box_2d":[y1,x1,y2,x2]}]`;
 
   const response = await callWithFallback(model =>
     ai.models.generateContent({

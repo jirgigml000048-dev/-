@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import { PurchaseList as PurchaseListType, FlowerAnnotation } from '../types';
-import FlowerAnnotationView from './FlowerAnnotation';
+import FlowerAnnotationOverlay from './FlowerAnnotation';
 
 interface PurchaseListProps {
   purchaseList: PurchaseListType | null;
@@ -21,6 +21,23 @@ export default function PurchaseList({
   const [exportDataUrl, setExportDataUrl] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [expandedAlts, setExpandedAlts] = useState<Set<number>>(new Set());
+  const [heroDataUrl, setHeroDataUrl] = useState(heroImageUrl);
+
+  // Pre-load hero image as base64 data URL so html-to-image can capture it
+  useEffect(() => {
+    if (!heroImageUrl) return;
+    if (heroImageUrl.startsWith('data:')) { setHeroDataUrl(heroImageUrl); return; }
+    fetch(heroImageUrl)
+      .then(r => r.blob())
+      .then(blob => new Promise<string>((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target!.result as string);
+        reader.onerror = rej;
+        reader.readAsDataURL(blob);
+      }))
+      .then(setHeroDataUrl)
+      .catch(() => {});
+  }, [heroImageUrl]);
 
   // Auto-show annotation when it first arrives
   useEffect(() => {
@@ -76,15 +93,6 @@ export default function PurchaseList({
   return (
     <main className="pt-24 px-6 max-w-2xl mx-auto pb-32">
 
-      {/* Annotation overlay */}
-      {showAnnotation && hasAnnotations && (
-        <FlowerAnnotationView
-          imageUrl={heroImageUrl}
-          annotations={annotations}
-          onClose={() => setShowAnnotation(false)}
-        />
-      )}
-
       {/* Export modal */}
       {exportDataUrl && (
         <div
@@ -134,46 +142,52 @@ export default function PurchaseList({
         {/* Hero Image */}
         <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden mb-14">
           <img
-            src={heroImageUrl}
+            src={heroDataUrl}
             alt={purchaseList.title}
             className="w-full h-full object-cover"
-            crossOrigin="anonymous"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          {/* Inline annotation SVG overlay */}
+          {showAnnotation && hasAnnotations && (
+            <FlowerAnnotationOverlay annotations={annotations!} />
+          )}
           {/* Quote */}
-          <div className="absolute bottom-5 left-5 right-5">
+          <div className="absolute bottom-5 left-5 right-5" data-html2canvas-ignore="true">
             <span className="inline-block bg-white/15 backdrop-blur-sm text-white font-headline text-sm italic px-4 py-2 rounded-full">
               「{purchaseList.title}」
             </span>
           </div>
-          {/* Annotation button — prominent floating pill */}
-          <button
-            onClick={() => hasAnnotations ? setShowAnnotation(true) : undefined}
-            disabled={isAnnotating || !hasAnnotations && !isAnnotating}
-            className="absolute top-4 right-4 flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg transition-all active:scale-95"
-            style={{
-              background: isAnnotating
-                ? 'rgba(0,0,0,0.45)'
-                : hasAnnotations
-                  ? 'rgba(255,255,255,0.25)'
-                  : 'rgba(0,0,0,0.3)',
-              backdropFilter: 'blur(8px)',
-              border: hasAnnotations ? '1.5px solid rgba(255,255,255,0.5)' : '1.5px solid rgba(255,255,255,0.15)',
-              display: (!hasAnnotations && !isAnnotating) ? 'none' : 'flex',
-            }}
-          >
-            {isAnnotating ? (
-              <>
-                <span className="material-symbols-outlined text-base animate-spin-slow">refresh</span>
-                识别中…
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-base">where_to_vote</span>
-                查看花束地图
-              </>
-            )}
-          </button>
+          {/* Annotation toggle button — excluded from export */}
+          {(isAnnotating || hasAnnotations) && (
+            <button
+              data-html2canvas-ignore="true"
+              onClick={() => hasAnnotations && setShowAnnotation(v => !v)}
+              disabled={isAnnotating}
+              className="absolute top-4 right-4 flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg transition-all active:scale-95"
+              style={{
+                background: isAnnotating ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.25)',
+                backdropFilter: 'blur(8px)',
+                border: '1.5px solid rgba(255,255,255,0.5)',
+              }}
+            >
+              {isAnnotating ? (
+                <>
+                  <span className="material-symbols-outlined text-base animate-spin-slow">refresh</span>
+                  识别中…
+                </>
+              ) : showAnnotation ? (
+                <>
+                  <span className="material-symbols-outlined text-base">visibility_off</span>
+                  隐藏标注
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-base">where_to_vote</span>
+                  查看花束地图
+                </>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Flower List */}

@@ -1,6 +1,6 @@
 import React from 'react';
-import { ActiveTab, FlowerStyle } from '../types';
-import { getUnsplashUrl, FEATURED_BOUQUET_ID, COLLECTION_ITEMS } from '../constants/flowers';
+import { ActiveTab } from '../types';
+import { FEATURED_IMAGE, COLLECTION_ITEMS } from '../constants/flowers';
 
 interface HomeScreenProps {
   onNavigate: (tab: ActiveTab) => void;
@@ -19,7 +19,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
         </div>
         <div className="relative overflow-hidden rounded-xl aspect-[4/5] md:aspect-video group">
           <img
-            src={getUnsplashUrl(FEATURED_BOUQUET_ID, 800)}
+            src={FEATURED_IMAGE}
             alt="今日推荐花束"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -88,7 +88,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
             >
               <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0">
                 <img
-                  src={getUnsplashUrl(item.id, 200)}
+                  src={item.image}
                   alt={item.title}
                   className="w-full h-full object-cover"
                 />

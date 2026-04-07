@@ -75,22 +75,23 @@ export default function App() {
     setStyleStep('gallery');
   }, []);
 
-  // Feature 1b: user picks photo → AI generates list + annotates in parallel
+  // Feature 1b: user picks photo → list first, then annotate with known flower names
   const handlePhotoConfirm = useCallback(async (photoUrl: string) => {
     setSelectedPhoto(photoUrl);
     setAnnotations(undefined);
     setPurchaseList(null);
     setStyleStep('purchase');
     setIsLoading(true);
-    setIsAnnotating(true);
     setError(null);
     try {
       const { base64, mimeType } = await fetchImageAsBase64(photoUrl);
-      const [list, anns] = await Promise.all([
-        generateBouquetRecommendation(selections.style, selections.occasion, selections.size),
-        annotateFlowersInImage(base64, mimeType).catch(() => [] as FlowerAnnotation[]),
-      ]);
+      const list = await generateBouquetRecommendation(selections.style, selections.occasion, selections.size);
       setPurchaseList(list);
+      setIsLoading(false);
+      // Annotate only the specific flowers in the list
+      setIsAnnotating(true);
+      const flowerNames = list.flowers.map(f => f.nameCN);
+      const anns = await annotateFlowersInImage(base64, mimeType, flowerNames).catch(() => [] as FlowerAnnotation[]);
       setAnnotations(anns.length > 0 ? anns : undefined);
     } catch (err) {
       setError(`生成失败：${err instanceof Error ? err.message : String(err)}`);
@@ -100,25 +101,27 @@ export default function App() {
     }
   }, [selections]);
 
-  // Feature 2: upload → identify + annotate in parallel
+  // Feature 2: upload → identify first, then annotate with known flower names
   const handleAnalyze = useCallback(async (image: UploadedImage) => {
     setUploadedImage(image);
     setIsLoading(true);
     setAnnotations(undefined);
     setError(null);
     try {
-      // Run identify and annotate in parallel
-      const [list, anns] = await Promise.all([
-        identifyFlowersFromImage(image.base64, image.mimeType),
-        annotateFlowersInImage(image.base64, image.mimeType).catch(() => [] as FlowerAnnotation[]),
-      ]);
+      const list = await identifyFlowersFromImage(image.base64, image.mimeType);
       setPurchaseList(list);
-      setAnnotations(anns.length > 0 ? anns : undefined);
       setIdentifyStep('result');
+      setIsLoading(false);
+      // Annotate only the identified flowers
+      setIsAnnotating(true);
+      const flowerNames = list.flowers.map(f => f.nameCN);
+      const anns = await annotateFlowersInImage(image.base64, image.mimeType, flowerNames).catch(() => [] as FlowerAnnotation[]);
+      setAnnotations(anns.length > 0 ? anns : undefined);
     } catch (err) {
       setError(`识别失败：${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsLoading(false);
+      setIsAnnotating(false);
     }
   }, []);
 
