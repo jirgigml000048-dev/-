@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { UploadedImage } from '../types';
-import { getUnsplashUrl, SAMPLE_PHOTO_IDS } from '../constants/flowers';
+import { SAMPLE_IMAGES } from '../constants/flowers';
 
 interface PhotoUploadProps {
   onAnalyze: (image: UploadedImage) => void;
@@ -85,7 +85,7 @@ export default function PhotoUpload({ onAnalyze, isLoading }: PhotoUploadProps) 
               {/* Background hint image */}
               <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <img
-                  src={getUnsplashUrl(SAMPLE_PHOTO_IDS[0], 400)}
+                  src={SAMPLE_IMAGES[0]}
                   alt=""
                   className="w-full h-full object-cover"
                 />
@@ -138,10 +138,10 @@ export default function PhotoUpload({ onAnalyze, isLoading }: PhotoUploadProps) 
 
       {/* Sample thumbnails */}
       <div className="w-full grid grid-cols-3 gap-4">
-        {SAMPLE_PHOTO_IDS.map((id, i) => (
-          <div key={id} className="aspect-square rounded-xl overflow-hidden bg-surface-container border border-outline-variant/10">
+        {SAMPLE_IMAGES.map((src, i) => (
+          <div key={src} className="aspect-square rounded-xl overflow-hidden bg-surface-container border border-outline-variant/10">
             <img
-              src={getUnsplashUrl(id, 200)}
+              src={src}
               alt={`示例 ${i + 1}`}
               className="w-full h-full object-cover opacity-80 grayscale hover:grayscale-0 transition-all cursor-pointer"
             />
