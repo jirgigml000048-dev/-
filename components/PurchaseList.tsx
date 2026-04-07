@@ -21,7 +21,6 @@ export default function PurchaseList({
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [exportDataUrl, setExportDataUrl] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
-  const [showExportCard, setShowExportCard] = useState(false);
   const [expandedAlts, setExpandedAlts] = useState<Set<number>>(new Set());
   const [heroDataUrl, setHeroDataUrl] = useState(heroImageUrl);
 
@@ -49,23 +48,19 @@ export default function PurchaseList({
   }, [annotations]);
 
   const handleExport = async () => {
-    if (!purchaseList) return;
+    if (!exportCardRef.current || !purchaseList) return;
     setExporting(true);
-    setShowExportCard(true);
-    // Wait for React to mount the card + images to decode
-    await new Promise(r => setTimeout(r, 400));
+    // Brief delay to ensure any pending state settles
+    await new Promise(r => setTimeout(r, 100));
     try {
-      if (!exportCardRef.current) throw new Error('card not ready');
       const dataUrl = await toPng(exportCardRef.current, {
         pixelRatio: 3,
-        cacheBust: true,
-        skipFonts: false,
+        cacheBust: false,
       });
       setExportDataUrl(dataUrl);
     } catch (err) {
       console.error('Export failed:', err);
     } finally {
-      setShowExportCard(false);
       setExporting(false);
     }
   };
@@ -300,14 +295,14 @@ export default function PurchaseList({
         </div>
       </div>
 
-      {/* ─── Export card: shown just below viewport when capturing ─── */}
-      {showExportCard && purchaseList && (
+      {/* ─── Export card: always in DOM so image is pre-loaded, hidden off left edge ─── */}
+      {purchaseList && (
         <div
           ref={exportCardRef}
           style={{
             position: 'fixed',
-            top: '110vh',
-            left: 0,
+            top: 0,
+            left: '-500px',
             width: '390px',
             background: '#FDFCF7',
             padding: '48px 36px 40px',
