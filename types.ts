@@ -22,6 +22,12 @@ export interface FlowerItem {
   quantity: number;
   color: string;
   notes: string;
+  alternatives?: string[]; // 备选花材，当主花买不到时
+}
+
+export interface FlowerAnnotation {
+  label: string;        // 花名
+  box_2d: [number, number, number, number]; // [y_min, x_min, y_max, x_max]，0-1000 归一化
 }
 
 export interface PurchaseList {

@@ -7,8 +7,9 @@ import {
   PurchaseList,
   UploadedImage,
   PhotoEntry,
+  FlowerAnnotation,
 } from './types';
-import { generateBouquetRecommendation, identifyFlowersFromImage } from './services/geminiService';
+import { generateBouquetRecommendation, identifyFlowersFromImage, annotateFlowersInImage } from './services/geminiService';
 import { filterPhotos } from './constants/photoLibrary';
 import TopAppBar from './components/TopAppBar';
 import BottomNav from './components/BottomNav';
@@ -37,6 +38,8 @@ export default function App() {
   const [purchaseList, setPurchaseList] = useState<PurchaseList | null>(null);
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnnotating, setIsAnnotating] = useState(false);
+  const [annotations, setAnnotations] = useState<FlowerAnnotation[] | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
   const handleTabChange = useCallback((tab: ActiveTab) => {
@@ -91,6 +94,21 @@ export default function App() {
     }
   }, []);
 
+  const handleRequestAnnotation = useCallback(async () => {
+    if (!uploadedImage) return;
+    setIsAnnotating(true);
+    setError(null);
+    try {
+      const result = await annotateFlowersInImage(uploadedImage.base64, uploadedImage.mimeType);
+      setAnnotations(result);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`标注失败：${msg}`);
+    } finally {
+      setIsAnnotating(false);
+    }
+  }, [uploadedImage]);
+
   const handleRedo = useCallback(() => {
     if (activeTab === 'style') {
       setStyleStep('select');
@@ -99,6 +117,7 @@ export default function App() {
       setIdentifyStep('upload');
       setUploadedImage(null);
       setPurchaseList(null);
+      setAnnotations(undefined);
     }
   }, [activeTab]);
 
@@ -156,6 +175,9 @@ export default function App() {
             purchaseList={purchaseList}
             heroImageUrl={uploadedImage.previewUrl}
             onRedo={handleRedo}
+            annotations={annotations}
+            onRequestAnnotation={handleRequestAnnotation}
+            isAnnotating={isAnnotating}
           />
         );
       }

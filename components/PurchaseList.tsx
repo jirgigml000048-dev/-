@@ -1,17 +1,26 @@
 import React, { useRef, useState } from 'react';
 import { toPng } from 'html-to-image';
 import { saveAs } from 'file-saver';
-import { PurchaseList as PurchaseListType } from '../types';
+import { PurchaseList as PurchaseListType, FlowerAnnotation } from '../types';
+import FlowerAnnotationView from './FlowerAnnotation';
 
 interface PurchaseListProps {
   purchaseList: PurchaseListType;
   heroImageUrl: string;
   onRedo: () => void;
+  annotations?: FlowerAnnotation[];       // 可选，来自识花流程
+  onRequestAnnotation?: () => void;       // 触发标注请求
+  isAnnotating?: boolean;                 // 标注加载中
 }
 
-export default function PurchaseList({ purchaseList, heroImageUrl, onRedo }: PurchaseListProps) {
+export default function PurchaseList({
+  purchaseList, heroImageUrl, onRedo,
+  annotations, onRequestAnnotation, isAnnotating,
+}: PurchaseListProps) {
   const exportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [showAnnotation, setShowAnnotation] = useState(false);
+  const [expandedAlts, setExpandedAlts] = useState<Set<number>>(new Set());
 
   const handleExport = async () => {
     if (!exportRef.current) return;
@@ -30,8 +39,24 @@ export default function PurchaseList({ purchaseList, heroImageUrl, onRedo }: Pur
     }
   };
 
+  const toggleAlt = (i: number) => {
+    setExpandedAlts(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  };
+
   return (
     <main className="pt-24 px-6 max-w-2xl mx-auto pb-32">
+      {/* Annotation overlay */}
+      {showAnnotation && annotations && annotations.length > 0 && (
+        <FlowerAnnotationView
+          imageUrl={heroImageUrl}
+          annotations={annotations}
+          onClose={() => setShowAnnotation(false)}
+        />
+      )}
       {/* Exportable area */}
       <div ref={exportRef} className="bg-surface">
         {/* Header */}
@@ -65,6 +90,22 @@ export default function PurchaseList({ purchaseList, heroImageUrl, onRedo }: Pur
               「{purchaseList.title}」
             </p>
           </div>
+          {/* Annotation button */}
+          {onRequestAnnotation && (
+            <button
+              onClick={annotations ? () => setShowAnnotation(true) : onRequestAnnotation}
+              disabled={isAnnotating}
+              className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white text-xs font-label font-semibold px-3 py-2 rounded-full hover:bg-black/70 transition-colors disabled:opacity-60"
+            >
+              {isAnnotating ? (
+                <><span className="material-symbols-outlined text-sm animate-spin-slow">refresh</span>识别中…</>
+              ) : annotations ? (
+                <><span className="material-symbols-outlined text-sm">local_florist</span>查看标注</>
+              ) : (
+                <><span className="material-symbols-outlined text-sm">where_to_vote</span>标注花束</>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Flower List */}
@@ -77,32 +118,60 @@ export default function PurchaseList({ purchaseList, heroImageUrl, onRedo }: Pur
             {purchaseList.flowers.map((flower, i) => (
               <div
                 key={i}
-                className="flex items-start justify-between py-5 border-b border-outline-variant/15"
+                className="py-5 border-b border-outline-variant/15"
               >
-                <div className="flex items-start gap-4">
-                  <span className="w-2 h-2 rounded-full bg-primary/30 mt-2 shrink-0" />
-                  <div>
-                    <p className="font-semibold text-lg text-on-surface">
-                      {flower.nameCN}
-                      {flower.color && (
-                        <span className="text-secondary font-normal text-base ml-2">
-                          ({flower.color})
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-secondary text-xs font-label uppercase tracking-wider mt-1">
-                      {flower.nameLatin}
-                    </p>
-                    {flower.notes && (
-                      <p className="text-on-surface-variant text-sm mt-1 font-body">
-                        {flower.notes}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <span className="w-2 h-2 rounded-full bg-primary/30 mt-2 shrink-0" />
+                    <div>
+                      <p className="font-semibold text-lg text-on-surface">
+                        {flower.nameCN}
+                        {flower.color && (
+                          <span className="text-secondary font-normal text-base ml-2">
+                            ({flower.color})
+                          </span>
+                        )}
                       </p>
+                      <p className="text-secondary text-xs font-label uppercase tracking-wider mt-1">
+                        {flower.nameLatin}
+                      </p>
+                      {flower.notes && (
+                        <p className="text-on-surface-variant text-sm mt-1 font-body">
+                          {flower.notes}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <span className="font-headline text-xl text-primary shrink-0 ml-4">
+                    ×{flower.quantity}
+                  </span>
+                </div>
+                {/* Alternatives */}
+                {flower.alternatives && flower.alternatives.length > 0 && (
+                  <div className="ml-6 mt-2">
+                    <button
+                      onClick={() => toggleAlt(i)}
+                      className="flex items-center gap-1 text-xs font-label text-secondary hover:text-primary transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        {expandedAlts.has(i) ? 'expand_less' : 'expand_more'}
+                      </span>
+                      买不到？看备选
+                    </button>
+                    {expandedAlts.has(i) && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {flower.alternatives.map((alt, j) => (
+                          <span
+                            key={j}
+                            className="px-3 py-1 bg-surface-container text-secondary text-xs font-label rounded-full"
+                          >
+                            {alt}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
-                <span className="font-headline text-xl text-primary shrink-0 ml-4">
-                  ×{flower.quantity}
-                </span>
+                )}
               </div>
             ))}
           </div>
