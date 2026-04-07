@@ -20,6 +20,7 @@ export default function PurchaseList({
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [exportDataUrl, setExportDataUrl] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [exportWithAnnotation, setExportWithAnnotation] = useState(true);
   const [expandedAlts, setExpandedAlts] = useState<Set<number>>(new Set());
   const [heroDataUrl, setHeroDataUrl] = useState(heroImageUrl);
 
@@ -50,7 +51,11 @@ export default function PurchaseList({
     if (!purchaseList) return;
     setExporting(true);
     try {
-      const dataUrl = await buildExportImage(heroDataUrl, purchaseList, annotations);
+      const dataUrl = await buildExportImage(
+        heroDataUrl,
+        purchaseList,
+        exportWithAnnotation ? annotations : undefined,
+      );
       setExportDataUrl(dataUrl);
     } catch (err) {
       console.error('Export failed:', err);
@@ -291,6 +296,21 @@ export default function PurchaseList({
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 mt-10">
+        {/* Annotation toggle — only shown when annotations exist */}
+        {hasAnnotations && (
+          <button
+            onClick={() => setExportWithAnnotation(v => !v)}
+            className="w-full py-3 px-4 flex items-center justify-between rounded-xl border border-outline-variant/20 text-sm font-label text-secondary active:scale-[0.98] transition-all"
+          >
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">where_to_vote</span>
+              导出图包含花束标注
+            </span>
+            <span className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 ${exportWithAnnotation ? 'bg-primary' : 'bg-outline-variant/30'}`}>
+              <span className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${exportWithAnnotation ? 'translate-x-4' : ''}`} />
+            </span>
+          </button>
+        )}
         <button
           onClick={handleExport}
           disabled={exporting}

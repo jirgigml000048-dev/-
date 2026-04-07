@@ -28,6 +28,27 @@ function rrect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h
   ctx.closePath();
 }
 
+// object-fit: cover — crops image to fill target rect without distortion
+function drawImageCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  dx: number, dy: number, dw: number, dh: number,
+) {
+  const imgAspect    = img.naturalWidth / img.naturalHeight;
+  const targetAspect = dw / dh;
+  let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+  if (imgAspect > targetAspect) {
+    // image wider than target → crop sides
+    sw = img.naturalHeight * targetAspect;
+    sx = (img.naturalWidth - sw) / 2;
+  } else {
+    // image taller than target → crop top/bottom
+    sh = img.naturalWidth / targetAspect;
+    sy = (img.naturalHeight - sh) / 2;
+  }
+  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+
 // Wrap Chinese/English mixed text to fit maxWidth
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
   const chars = Array.from(text);
@@ -203,7 +224,7 @@ export async function buildExportImage(
   ctx.save();
   rrect(ctx, PH, imgY, IMG_W, IMG_H, 14);
   ctx.clip();
-  ctx.drawImage(heroImg, PH, imgY, IMG_W, IMG_H);
+  drawImageCover(ctx, heroImg, PH, imgY, IMG_W, IMG_H);
 
   const grad = ctx.createLinearGradient(0, imgY, 0, imgY + IMG_H);
   grad.addColorStop(0.55, 'rgba(0,0,0,0)');
