@@ -6,9 +6,11 @@ import {
   StyleSelections,
   PurchaseList,
   UploadedImage,
+  PhotoEntry,
+  FlowerAnnotation,
 } from './types';
-import { generateBouquetRecommendation, identifyFlowersFromImage } from './services/geminiService';
-import { getRandomPhotos } from './constants/flowers';
+import { generateBouquetRecommendation, identifyFlowersFromImage, annotateFlowersInImage } from './services/geminiService';
+import { filterPhotos } from './constants/photoLibrary';
 import TopAppBar from './components/TopAppBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
@@ -16,22 +18,43 @@ import StyleSelector from './components/StyleSelector';
 import BouquetGallery from './components/BouquetGallery';
 import PurchaseListScreen from './components/PurchaseList';
 import PhotoUpload from './components/PhotoUpload';
+import LibraryPreview from './components/LibraryPreview';
+
+const isPreview = new URLSearchParams(window.location.search).has('preview');
+
+// Fetch a local image URL and return base64 + mimeType
+async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  const mimeType = blob.type || 'image/jpeg';
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target?.result as string;
+      resolve({ base64: dataUrl.split(',')[1], mimeType });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 
 export default function App() {
+  if (isPreview) return <LibraryPreview />;
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [styleStep, setStyleStep] = useState<StyleFlowStep>('select');
   const [identifyStep, setIdentifyStep] = useState<IdentifyFlowStep>('upload');
 
   const [selections, setSelections] = useState<StyleSelections>({
-    style: '浪漫唯美',
-    occasion: '爱情',
-    size: '中型',
+    style: '浪漫唯美', occasion: '爱情', size: '中型',
   });
-  const [recommendedPhotos, setRecommendedPhotos] = useState<string[]>([]);
+  const [recommendedPhotos, setRecommendedPhotos] = useState<PhotoEntry[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string>('');
   const [purchaseList, setPurchaseList] = useState<PurchaseList | null>(null);
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnnotating, setIsAnnotating] = useState(false);
+  const [annotations, setAnnotations] = useState<FlowerAnnotation[] | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
   const handleTabChange = useCallback((tab: ActiveTab) => {
@@ -47,40 +70,53 @@ export default function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const list = await generateBouquetRecommendation(sel.style, sel.occasion, sel.size);
-      const photos = getRandomPhotos(sel.style, 4);
+      const [list, photos] = await Promise.all([
+        generateBouquetRecommendation(sel.style, sel.occasion, sel.size),
+        Promise.resolve(filterPhotos(sel, 4)),
+      ]);
       setPurchaseList(list);
       setRecommendedPhotos(photos);
-      setSelectedPhoto(photos[0]);
+      setSelectedPhoto(photos[0]?.url ?? '');
+      setAnnotations(undefined);
       setStyleStep('gallery');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`推荐失败：${msg}`);
-      console.error(err);
+      setError(`推荐失败：${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Feature 1: user picks photo → show purchase list
+  // Feature 1b: user picks photo → show purchase list, then auto-annotate in background
   const handlePhotoConfirm = useCallback((photoUrl: string) => {
     setSelectedPhoto(photoUrl);
+    setAnnotations(undefined);
     setStyleStep('purchase');
+    // Auto-annotate the selected library photo in background
+    setIsAnnotating(true);
+    fetchImageAsBase64(photoUrl)
+      .then(({ base64, mimeType }) => annotateFlowersInImage(base64, mimeType))
+      .then(anns => setAnnotations(anns))
+      .catch(() => {}) // silent fail for annotation
+      .finally(() => setIsAnnotating(false));
   }, []);
 
-  // Feature 2: upload image → Gemini Vision → purchase list
+  // Feature 2: upload → identify + annotate in parallel
   const handleAnalyze = useCallback(async (image: UploadedImage) => {
     setUploadedImage(image);
     setIsLoading(true);
+    setAnnotations(undefined);
     setError(null);
     try {
-      const list = await identifyFlowersFromImage(image.base64, image.mimeType);
+      // Run identify and annotate in parallel
+      const [list, anns] = await Promise.all([
+        identifyFlowersFromImage(image.base64, image.mimeType),
+        annotateFlowersInImage(image.base64, image.mimeType).catch(() => [] as FlowerAnnotation[]),
+      ]);
       setPurchaseList(list);
+      setAnnotations(anns.length > 0 ? anns : undefined);
       setIdentifyStep('result');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`识别失败：${msg}`);
-      console.error(err);
+      setError(`识别失败：${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsLoading(false);
     }
@@ -90,10 +126,12 @@ export default function App() {
     if (activeTab === 'style') {
       setStyleStep('select');
       setPurchaseList(null);
+      setAnnotations(undefined);
     } else {
       setIdentifyStep('upload');
       setUploadedImage(null);
       setPurchaseList(null);
+      setAnnotations(undefined);
     }
   }, [activeTab]);
 
@@ -111,15 +149,12 @@ export default function App() {
   }, [activeTab, styleStep, identifyStep]);
 
   const renderScreen = () => {
-    if (activeTab === 'home') {
-      return <HomeScreen onNavigate={handleTabChange} />;
-    }
+    if (activeTab === 'home') return <HomeScreen onNavigate={handleTabChange} />;
 
     if (activeTab === 'style') {
-      if (styleStep === 'select') {
+      if (styleStep === 'select')
         return <StyleSelector onConfirm={handleStyleConfirm} isLoading={isLoading} />;
-      }
-      if (styleStep === 'gallery') {
+      if (styleStep === 'gallery')
         return (
           <BouquetGallery
             selections={selections}
@@ -129,43 +164,44 @@ export default function App() {
             onBack={() => setStyleStep('select')}
           />
         );
-      }
-      if (styleStep === 'purchase' && purchaseList) {
+      if (styleStep === 'purchase' && purchaseList)
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
             heroImageUrl={selectedPhoto}
             onRedo={handleRedo}
+            annotations={annotations}
+            isAnnotating={isAnnotating}
           />
         );
-      }
     }
 
     if (activeTab === 'identify') {
-      if (identifyStep === 'upload') {
+      if (identifyStep === 'upload')
         return <PhotoUpload onAnalyze={handleAnalyze} isLoading={isLoading} />;
-      }
-      if (identifyStep === 'result' && purchaseList && uploadedImage) {
+      if (identifyStep === 'result' && purchaseList && uploadedImage)
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
             heroImageUrl={uploadedImage.previewUrl}
             onRedo={handleRedo}
+            annotations={annotations}
+            isAnnotating={isAnnotating}
           />
         );
-      }
     }
 
     if (activeTab === 'lists') {
-      if (purchaseList) {
+      if (purchaseList)
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
             heroImageUrl={selectedPhoto || uploadedImage?.previewUrl || ''}
             onRedo={handleRedo}
+            annotations={annotations}
+            isAnnotating={isAnnotating}
           />
         );
-      }
       return <HomeScreen onNavigate={handleTabChange} />;
     }
 
@@ -175,7 +211,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-surface text-on-surface">
       <TopAppBar showBack={showBack} onBack={handleBack} />
-
       {error && (
         <div className="fixed top-20 left-0 right-0 z-40 px-6 max-w-2xl mx-auto">
           <div className="bg-error-container text-on-error-container px-5 py-4 rounded-xl flex items-center gap-3 shadow-lg">
@@ -187,9 +222,7 @@ export default function App() {
           </div>
         </div>
       )}
-
       {renderScreen()}
-
       <BottomNav activeTab={activeTab} onChange={handleTabChange} />
     </div>
   );
