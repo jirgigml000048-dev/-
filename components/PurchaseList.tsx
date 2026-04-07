@@ -61,7 +61,7 @@ export default function PurchaseList({
     return (
       <main className="pt-24 px-6 max-w-2xl mx-auto pb-32 flex flex-col items-center">
         {heroImageUrl && (
-          <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden mb-10">
+          <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden mb-10">
             <img src={heroImageUrl} alt="" className="w-full h-full object-cover opacity-80" />
           </div>
         )}
@@ -132,7 +132,7 @@ export default function PurchaseList({
         </section>
 
         {/* Hero Image */}
-        <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-14">
+        <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden mb-14">
           <img
             src={heroImageUrl}
             alt={purchaseList.title}

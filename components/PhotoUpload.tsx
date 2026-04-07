@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { UploadedImage } from '../types';
-import { getUnsplashUrl, SAMPLE_PHOTO_IDS } from '../constants/flowers';
 
 interface PhotoUploadProps {
   onAnalyze: (image: UploadedImage) => void;
@@ -81,33 +80,23 @@ export default function PhotoUpload({ onAnalyze, isLoading }: PhotoUploadProps) 
             </>
           ) : (
             /* Default upload prompt */
-            <>
-              {/* Background hint image */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <img
-                  src={getUnsplashUrl(SAMPLE_PHOTO_IDS[0], 400)}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <div className="size-20 rounded-full bg-surface-container-highest flex items-center justify-center text-primary transition-transform group-hover:scale-110 duration-500">
+                <span className="material-symbols-outlined text-4xl">photo_camera</span>
               </div>
-              <div className="relative z-10 flex flex-col items-center gap-4">
-                <div className="size-20 rounded-full bg-surface-container-highest flex items-center justify-center text-primary transition-transform group-hover:scale-110 duration-500">
-                  <span className="material-symbols-outlined text-4xl">photo_camera</span>
-                </div>
-                <div className="text-center">
-                  <p className="font-headline text-lg font-bold text-on-surface">
-                    点击或拖拽上传花束照片
-                  </p>
-                  <p className="text-secondary text-sm mt-1">支持 JPG、PNG 格式</p>
-                </div>
-                <button
-                  className="mt-2 px-8 py-3 bg-surface-container-highest text-on-surface rounded-full text-sm font-bold border border-outline-variant/20 hover:bg-surface-dim transition-colors"
-                  onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
-                >
-                  选择照片
-                </button>
+              <div className="text-center">
+                <p className="font-headline text-lg font-bold text-on-surface">
+                  点击或拖拽上传花束照片
+                </p>
+                <p className="text-secondary text-sm mt-1">支持 JPG、PNG 格式</p>
               </div>
-            </>
+              <button
+                className="mt-2 px-8 py-3 bg-surface-container-highest text-on-surface rounded-full text-sm font-bold border border-outline-variant/20 hover:bg-surface-dim transition-colors"
+                onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+              >
+                选择照片
+              </button>
+            </div>
           )}
         </div>
 
@@ -135,19 +124,6 @@ export default function PhotoUpload({ onAnalyze, isLoading }: PhotoUploadProps) 
       {error && (
         <p className="text-error text-sm font-label text-center">{error}</p>
       )}
-
-      {/* Sample thumbnails */}
-      <div className="w-full grid grid-cols-3 gap-4">
-        {SAMPLE_PHOTO_IDS.map((id, i) => (
-          <div key={id} className="aspect-square rounded-xl overflow-hidden bg-surface-container border border-outline-variant/10">
-            <img
-              src={getUnsplashUrl(id, 200)}
-              alt={`示例 ${i + 1}`}
-              className="w-full h-full object-cover opacity-80 grayscale hover:grayscale-0 transition-all cursor-pointer"
-            />
-          </div>
-        ))}
-      </div>
 
       {/* Analyze Button */}
       <div className="w-full">
