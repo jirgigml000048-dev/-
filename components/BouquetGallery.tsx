@@ -5,7 +5,7 @@ interface BouquetGalleryProps {
   selections: StyleSelections;
   purchaseList: PurchaseList | null;
   photos: PhotoEntry[];
-  onConfirm: (photoUrl: string) => void;
+  onConfirm: (photo: PhotoEntry) => void;
   onBack: () => void;
 }
 
@@ -89,7 +89,7 @@ export default function BouquetGallery({
       {/* Action Buttons */}
       <div className="flex flex-col gap-4">
         <button
-          onClick={() => onConfirm(photos[selected].url)}
+          onClick={() => onConfirm(photos[selected])}
           className="w-full bg-primary text-on-primary font-body font-semibold px-10 py-5 rounded-xl flex items-center justify-center gap-3 hover:bg-primary-container transition-colors shadow-lg shadow-primary/10"
         >
           <span className="material-symbols-outlined">shopping_basket</span>

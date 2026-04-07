@@ -9,7 +9,8 @@ import {
   PhotoEntry,
   FlowerAnnotation,
 } from './types';
-import { generateBouquetRecommendation, identifyFlowersFromImage, annotateFlowersInImage } from './services/geminiService';
+import { identifyFlowersFromImage, annotateFlowersInImage } from './services/geminiService';
+import { getPhotoCache, setPhotoCache } from './utils/supabaseCache';
 import { filterPhotos } from './constants/photoLibrary';
 import TopAppBar from './components/TopAppBar';
 import BottomNav from './components/BottomNav';
@@ -75,31 +76,41 @@ export default function App() {
     setStyleStep('gallery');
   }, []);
 
-  // Feature 1b: user picks photo → list first, then annotate with known flower names
-  const handlePhotoConfirm = useCallback(async (photoUrl: string) => {
-    setSelectedPhoto(photoUrl);
+  // Feature 1b: user picks photo → check cache first, then visually identify
+  const handlePhotoConfirm = useCallback(async (photo: PhotoEntry) => {
+    setSelectedPhoto(photo.url);
     setAnnotations(undefined);
     setPurchaseList(null);
     setStyleStep('purchase');
     setIsLoading(true);
     setError(null);
     try {
-      const { base64, mimeType } = await fetchImageAsBase64(photoUrl);
-      const list = await generateBouquetRecommendation(selections.style, selections.occasion, selections.size);
+      // Check Supabase cache first
+      const cached = await getPhotoCache(photo.id);
+      if (cached) {
+        setPurchaseList(cached.purchase_list);
+        setAnnotations(cached.annotations.length > 0 ? cached.annotations : undefined);
+        return;
+      }
+      // Cache miss → visually identify
+      const { base64, mimeType } = await fetchImageAsBase64(photo.url);
+      const list = await identifyFlowersFromImage(base64, mimeType);
       setPurchaseList(list);
       setIsLoading(false);
-      // Annotate only the specific flowers in the list
       setIsAnnotating(true);
       const flowerNames = list.flowers.map(f => f.nameCN);
       const anns = await annotateFlowersInImage(base64, mimeType, flowerNames).catch(() => [] as FlowerAnnotation[]);
-      setAnnotations(anns.length > 0 ? anns : undefined);
+      const finalAnns = anns.length > 0 ? anns : [];
+      setAnnotations(finalAnns.length > 0 ? finalAnns : undefined);
+      // Fire-and-forget cache write
+      setPhotoCache(photo.id, list, finalAnns);
     } catch (err) {
       setError(`生成失败：${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsLoading(false);
       setIsAnnotating(false);
     }
-  }, [selections]);
+  }, []);
 
   // Feature 2: upload → identify first, then annotate with known flower names
   const handleAnalyze = useCallback(async (image: UploadedImage) => {
