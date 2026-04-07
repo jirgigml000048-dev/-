@@ -1,10 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { PurchaseList, FlowerAnnotation } from '../types';
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL as string,
-  import.meta.env.VITE_SUPABASE_ANON_KEY as string
-);
+const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+
+const supabase: SupabaseClient | null =
+  url && key ? createClient(url, key) : null;
 
 export interface PhotoCache {
   purchase_list: PurchaseList;
@@ -12,6 +13,7 @@ export interface PhotoCache {
 }
 
 export async function getPhotoCache(photoId: string): Promise<PhotoCache | null> {
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from('photo_cache')
     .select('purchase_list, annotations')
@@ -26,6 +28,7 @@ export async function setPhotoCache(
   purchaseList: PurchaseList,
   annotations: FlowerAnnotation[]
 ): Promise<void> {
+  if (!supabase) return;
   await supabase.from('photo_cache').upsert(
     { photo_id: photoId, purchase_list: purchaseList, annotations },
     { onConflict: 'photo_id', ignoreDuplicates: true }
