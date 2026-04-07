@@ -10,9 +10,9 @@ function getClient(): GoogleGenAI {
 // Fallback chain: try each model in order on 503/429/404
 const MODELS = [
   'gemini-3-flash-preview',
-  'gemini-2.5-flash-preview-04-17',
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-flash-latest',
+  'gemini-3.1-pro-preview',
 ];
 
 async function callWithFallback(
