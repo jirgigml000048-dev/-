@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSelections, PurchaseList } from '../types';
-import { getRandomPhotos } from '../constants/flowers';
+import { StyleSelections, PurchaseList, PhotoEntry } from '../types';
 
 interface BouquetGalleryProps {
   selections: StyleSelections;
   purchaseList: PurchaseList | null;
-  photos: string[];
+  photos: PhotoEntry[];
   onConfirm: (photoUrl: string) => void;
   onBack: () => void;
 }
-
-const PHOTO_NAMES = ['初夏微风', '森林呼吸', '晨间雾气', '大地韵律'];
 
 export default function BouquetGallery({
   selections,
@@ -40,12 +37,12 @@ export default function BouquetGallery({
 
       {/* 2x2 Staggered Grid */}
       <div className="grid grid-cols-2 gap-6 mb-16">
-        {photos.slice(0, 4).map((url, index) => {
+        {photos.slice(0, 4).map((photo, index) => {
           const isSelected = selected === index;
           const isOffset = index === 1 || index === 3; // right column offset
           return (
             <div
-              key={index}
+              key={photo.id}
               className={`flex flex-col group ${isOffset ? 'mt-8 md:mt-16' : ''}`}
             >
               <button
@@ -57,8 +54,8 @@ export default function BouquetGallery({
                 }`}
               >
                 <img
-                  src={url}
-                  alt={PHOTO_NAMES[index]}
+                  src={photo.url}
+                  alt={photo.name}
                   className={`w-full h-full object-cover transition-all duration-700 ${
                     isSelected
                       ? 'scale-105'
@@ -78,7 +75,7 @@ export default function BouquetGallery({
               </button>
               <div className="mt-4 flex items-center justify-between">
                 <span className="font-headline text-xl text-primary">
-                  {PHOTO_NAMES[index]}
+                  {photo.name}
                 </span>
                 {isSelected && (
                   <span className="font-label text-secondary text-xs uppercase tracking-tighter">
@@ -94,7 +91,7 @@ export default function BouquetGallery({
       {/* Action Buttons */}
       <div className="flex flex-col gap-4">
         <button
-          onClick={() => onConfirm(photos[selected])}
+          onClick={() => onConfirm(photos[selected]?.url ?? '')}
           className="w-full bg-primary text-on-primary font-body font-semibold px-10 py-5 rounded-xl flex items-center justify-center gap-3 hover:bg-primary-container transition-colors shadow-lg shadow-primary/10"
         >
           <span className="material-symbols-outlined">shopping_basket</span>

@@ -6,9 +6,10 @@ import {
   StyleSelections,
   PurchaseList,
   UploadedImage,
+  PhotoEntry,
 } from './types';
 import { generateBouquetRecommendation, identifyFlowersFromImage } from './services/geminiService';
-import { getRandomPhotos } from './constants/flowers';
+import { filterPhotos } from './constants/photoLibrary';
 import TopAppBar from './components/TopAppBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
@@ -16,8 +17,12 @@ import StyleSelector from './components/StyleSelector';
 import BouquetGallery from './components/BouquetGallery';
 import PurchaseListScreen from './components/PurchaseList';
 import PhotoUpload from './components/PhotoUpload';
+import LibraryPreview from './components/LibraryPreview';
+
+const isPreview = new URLSearchParams(window.location.search).has('preview');
 
 export default function App() {
+  if (isPreview) return <LibraryPreview />;
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [styleStep, setStyleStep] = useState<StyleFlowStep>('select');
   const [identifyStep, setIdentifyStep] = useState<IdentifyFlowStep>('upload');
@@ -27,7 +32,7 @@ export default function App() {
     occasion: '爱情',
     size: '中型',
   });
-  const [recommendedPhotos, setRecommendedPhotos] = useState<string[]>([]);
+  const [recommendedPhotos, setRecommendedPhotos] = useState<PhotoEntry[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string>('');
   const [purchaseList, setPurchaseList] = useState<PurchaseList | null>(null);
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
@@ -48,10 +53,10 @@ export default function App() {
     setError(null);
     try {
       const list = await generateBouquetRecommendation(sel.style, sel.occasion, sel.size);
-      const photos = getRandomPhotos(sel.style, 4);
+      const photos = filterPhotos(sel, 4);
       setPurchaseList(list);
       setRecommendedPhotos(photos);
-      setSelectedPhoto(photos[0]);
+      setSelectedPhoto(photos[0]?.url ?? '');
       setStyleStep('gallery');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
