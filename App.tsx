@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   ActiveTab,
   StyleFlowStep,
@@ -23,6 +23,24 @@ import LibraryPreview from './components/LibraryPreview';
 
 const isPreview = new URLSearchParams(window.location.search).has('preview');
 
+const DEFAULT_SELECTIONS: StyleSelections = {
+  style: '浪漫唯美', occasion: '爱情', size: '中型',
+};
+
+function loadSelections(): StyleSelections {
+  try {
+    const s = localStorage.getItem('pi_selections');
+    return s ? { ...DEFAULT_SELECTIONS, ...JSON.parse(s) } : DEFAULT_SELECTIONS;
+  } catch { return DEFAULT_SELECTIONS; }
+}
+
+function loadLastList(): { purchaseList: PurchaseList; selectedPhoto: string } | null {
+  try {
+    const s = localStorage.getItem('pi_last_list');
+    return s ? JSON.parse(s) : null;
+  } catch { return null; }
+}
+
 // Fetch a local image URL and return base64 + mimeType
 async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
   const res = await fetch(url);
@@ -46,9 +64,7 @@ export default function App() {
   const [styleStep, setStyleStep] = useState<StyleFlowStep>('select');
   const [identifyStep, setIdentifyStep] = useState<IdentifyFlowStep>('upload');
 
-  const [selections, setSelections] = useState<StyleSelections>({
-    style: '浪漫唯美', occasion: '爱情', size: '中型',
-  });
+  const [selections, setSelections] = useState<StyleSelections>(loadSelections);
   const [recommendedPhotos, setRecommendedPhotos] = useState<PhotoEntry[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string>('');
   const [purchaseList, setPurchaseList] = useState<PurchaseList | null>(null);
@@ -57,6 +73,27 @@ export default function App() {
   const [isAnnotating, setIsAnnotating] = useState(false);
   const [annotations, setAnnotations] = useState<FlowerAnnotation[] | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore last purchase list on mount
+  useEffect(() => {
+    const last = loadLastList();
+    if (last) {
+      setPurchaseList(last.purchaseList);
+      setSelectedPhoto(last.selectedPhoto);
+    }
+  }, []);
+
+  // Persist selections whenever they change
+  useEffect(() => {
+    localStorage.setItem('pi_selections', JSON.stringify(selections));
+  }, [selections]);
+
+  // Persist last generated list
+  useEffect(() => {
+    if (purchaseList && selectedPhoto) {
+      localStorage.setItem('pi_last_list', JSON.stringify({ purchaseList, selectedPhoto }));
+    }
+  }, [purchaseList, selectedPhoto]);
 
   const handleTabChange = useCallback((tab: ActiveTab) => {
     setActiveTab(tab);

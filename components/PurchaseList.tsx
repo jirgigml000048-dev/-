@@ -97,23 +97,27 @@ export default function PurchaseList({
       {/* Export modal */}
       {exportDataUrl && (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 px-6"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/80 px-6 py-10"
           onClick={() => setExportDataUrl(null)}
         >
           <div
-            className="w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl"
+            className="w-full max-w-sm mx-auto bg-white rounded-2xl overflow-hidden shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
+            {/* Top back bar */}
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+              <button
+                onClick={() => setExportDataUrl(null)}
+                className="flex items-center gap-1 text-gray-600 text-sm font-semibold"
+              >
+                <span className="material-symbols-outlined text-base">arrow_back_ios</span>
+                返回
+              </button>
+            </div>
             <img src={exportDataUrl} alt="导出预览" className="w-full" />
             <div className="px-6 py-5 text-center">
               <p className="text-sm font-semibold text-gray-800">长按图片保存到相册</p>
               <p className="text-xs text-gray-400 mt-1">或截图保存</p>
-              <button
-                onClick={() => setExportDataUrl(null)}
-                className="mt-4 w-full py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold"
-              >
-                关闭
-              </button>
             </div>
           </div>
         </div>
