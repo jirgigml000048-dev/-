@@ -4,16 +4,17 @@ import { PurchaseList as PurchaseListType, FlowerAnnotation } from '../types';
 import FlowerAnnotationView from './FlowerAnnotation';
 
 interface PurchaseListProps {
-  purchaseList: PurchaseListType;
+  purchaseList: PurchaseListType | null;
   heroImageUrl: string;
   onRedo: () => void;
   annotations?: FlowerAnnotation[];
   isAnnotating?: boolean;
+  isLoading?: boolean;
 }
 
 export default function PurchaseList({
   purchaseList, heroImageUrl, onRedo,
-  annotations, isAnnotating,
+  annotations, isAnnotating, isLoading,
 }: PurchaseListProps) {
   const exportRef = useRef<HTMLDivElement>(null);
   const [showAnnotation, setShowAnnotation] = useState(false);
@@ -54,6 +55,23 @@ export default function PurchaseList({
   };
 
   const hasAnnotations = annotations && annotations.length > 0;
+
+  // Loading state: purchaseList not yet ready
+  if (!purchaseList) {
+    return (
+      <main className="pt-24 px-6 max-w-2xl mx-auto pb-32 flex flex-col items-center">
+        {heroImageUrl && (
+          <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden mb-10">
+            <img src={heroImageUrl} alt="" className="w-full h-full object-cover opacity-80" />
+          </div>
+        )}
+        <div className="flex flex-col items-center gap-4 py-8">
+          <span className="material-symbols-outlined text-primary text-4xl animate-spin-slow">refresh</span>
+          <p className="text-secondary font-label text-sm">AI 正在生成花材清单…</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="pt-24 px-6 max-w-2xl mx-auto pb-32">

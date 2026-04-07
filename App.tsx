@@ -64,41 +64,41 @@ export default function App() {
     setError(null);
   }, []);
 
-  // Feature 1: style selected → Gemini → gallery
-  const handleStyleConfirm = useCallback(async (sel: StyleSelections) => {
+  // Feature 1: style selected → filter photos locally → gallery (no AI yet)
+  const handleStyleConfirm = useCallback((sel: StyleSelections) => {
     setSelections(sel);
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [list, photos] = await Promise.all([
-        generateBouquetRecommendation(sel.style, sel.occasion, sel.size),
-        Promise.resolve(filterPhotos(sel, 4)),
-      ]);
-      setPurchaseList(list);
-      setRecommendedPhotos(photos);
-      setSelectedPhoto(photos[0]?.url ?? '');
-      setAnnotations(undefined);
-      setStyleStep('gallery');
-    } catch (err) {
-      setError(`推荐失败：${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setIsLoading(false);
-    }
+    const photos = filterPhotos(sel, 4);
+    setRecommendedPhotos(photos);
+    setSelectedPhoto(photos[0]?.url ?? '');
+    setPurchaseList(null);
+    setAnnotations(undefined);
+    setStyleStep('gallery');
   }, []);
 
-  // Feature 1b: user picks photo → show purchase list, then auto-annotate in background
-  const handlePhotoConfirm = useCallback((photoUrl: string) => {
+  // Feature 1b: user picks photo → AI generates list + annotates in parallel
+  const handlePhotoConfirm = useCallback(async (photoUrl: string) => {
     setSelectedPhoto(photoUrl);
     setAnnotations(undefined);
+    setPurchaseList(null);
     setStyleStep('purchase');
-    // Auto-annotate the selected library photo in background
+    setIsLoading(true);
     setIsAnnotating(true);
-    fetchImageAsBase64(photoUrl)
-      .then(({ base64, mimeType }) => annotateFlowersInImage(base64, mimeType))
-      .then(anns => setAnnotations(anns))
-      .catch(() => {}) // silent fail for annotation
-      .finally(() => setIsAnnotating(false));
-  }, []);
+    setError(null);
+    try {
+      const { base64, mimeType } = await fetchImageAsBase64(photoUrl);
+      const [list, anns] = await Promise.all([
+        generateBouquetRecommendation(selections.style, selections.occasion, selections.size),
+        annotateFlowersInImage(base64, mimeType).catch(() => [] as FlowerAnnotation[]),
+      ]);
+      setPurchaseList(list);
+      setAnnotations(anns.length > 0 ? anns : undefined);
+    } catch (err) {
+      setError(`生成失败：${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsLoading(false);
+      setIsAnnotating(false);
+    }
+  }, [selections]);
 
   // Feature 2: upload → identify + annotate in parallel
   const handleAnalyze = useCallback(async (image: UploadedImage) => {
@@ -164,7 +164,7 @@ export default function App() {
             onBack={() => setStyleStep('select')}
           />
         );
-      if (styleStep === 'purchase' && purchaseList)
+      if (styleStep === 'purchase')
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
@@ -172,6 +172,7 @@ export default function App() {
             onRedo={handleRedo}
             annotations={annotations}
             isAnnotating={isAnnotating}
+            isLoading={isLoading}
           />
         );
     }
