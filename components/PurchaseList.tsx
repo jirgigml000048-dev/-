@@ -17,6 +17,7 @@ export default function PurchaseList({
   annotations, isAnnotating, isLoading,
 }: PurchaseListProps) {
   const exportRef = useRef<HTMLDivElement>(null);
+  const exportCardRef = useRef<HTMLDivElement>(null);
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [exportDataUrl, setExportDataUrl] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -47,13 +48,12 @@ export default function PurchaseList({
   }, [annotations]);
 
   const handleExport = async () => {
-    if (!exportRef.current) return;
+    if (!exportCardRef.current) return;
     setExporting(true);
     try {
-      const dataUrl = await toPng(exportRef.current, {
-        pixelRatio: 2,
+      const dataUrl = await toPng(exportCardRef.current, {
+        pixelRatio: 3,
         cacheBust: true,
-        style: { fontFamily: "'Noto Serif SC', serif" },
       });
       setExportDataUrl(dataUrl);
     } catch (err) {
@@ -292,6 +292,76 @@ export default function PurchaseList({
           <p className="text-[10px] text-secondary/30 font-label uppercase tracking-widest">Botanical Intelligence</p>
         </div>
       </div>
+
+      {/* ─── Hidden export card (off-screen, captured by html-to-image) ─── */}
+      {purchaseList && (
+        <div
+          ref={exportCardRef}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 0,
+            width: '390px',
+            background: '#FDFCF7',
+            padding: '48px 36px 40px',
+            fontFamily: "'Noto Serif SC', 'Noto Sans SC', serif",
+            boxSizing: 'border-box',
+          }}
+        >
+          {/* Brand header */}
+          <div style={{ marginBottom: '32px' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '0.25em', color: '#9CA3AF', textTransform: 'uppercase', marginBottom: '6px', fontFamily: 'sans-serif' }}>
+              Botanical Intelligence
+            </p>
+            <h1 style={{ fontSize: '38px', fontWeight: 700, color: '#172f28', fontStyle: 'italic', margin: 0, lineHeight: 1.1 }}>
+              植觉
+            </h1>
+            <p style={{ fontSize: '11px', letterSpacing: '0.15em', color: '#9CA3AF', marginTop: '4px', fontFamily: 'sans-serif' }}>
+              Plant Instinct
+            </p>
+          </div>
+
+          {/* Hero image with annotation */}
+          <div style={{ position: 'relative', width: '100%', aspectRatio: '3 / 4', borderRadius: '16px', overflow: 'hidden', marginBottom: '28px' }}>
+            <img
+              src={heroDataUrl}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.25), transparent)' }} />
+            {annotations && annotations.length > 0 && (
+              <FlowerAnnotationOverlay annotations={annotations} forExport />
+            )}
+          </div>
+
+          {/* Title + tags */}
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#172f28', margin: '0 0 8px', lineHeight: 1.3 }}>
+              {purchaseList.title || '专属花束清单'}
+            </h2>
+            <p style={{ fontSize: '11px', color: '#9CA3AF', margin: 0, letterSpacing: '0.05em', fontFamily: 'sans-serif' }}>
+              {purchaseList.style} · {purchaseList.occasion} · {purchaseList.size}
+            </p>
+          </div>
+
+          {/* Flower grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', marginBottom: '28px' }}>
+            {purchaseList.flowers.map((f, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#172f28', opacity: 0.35, flexShrink: 0 }} />
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#172f28', flex: 1, minWidth: 0 }}>{f.nameCN}</span>
+                <span style={{ fontSize: '13px', color: '#9CA3AF', fontFamily: 'sans-serif', flexShrink: 0 }}>×{f.quantity}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Divider + footer */}
+          <div style={{ borderTop: '1px solid rgba(23,47,40,0.1)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#9CA3AF', fontStyle: 'italic' }}>植觉 Plant Instinct</span>
+            <span style={{ fontSize: '9px', color: '#C4C4C4', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'sans-serif' }}>Botanical</span>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 mt-10">

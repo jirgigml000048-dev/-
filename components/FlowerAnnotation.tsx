@@ -3,6 +3,7 @@ import { FlowerAnnotation } from '../types';
 
 interface FlowerAnnotationOverlayProps {
   annotations: FlowerAnnotation[];
+  forExport?: boolean; // disables animation so html-to-image captures correctly
 }
 
 const PALETTE = [
@@ -16,7 +17,7 @@ const PALETTE = [
   { dot: '#A5F3FC', label: '#0E7490' }, // cyan
 ];
 
-export default function FlowerAnnotationOverlay({ annotations }: FlowerAnnotationOverlayProps) {
+export default function FlowerAnnotationOverlay({ annotations, forExport = false }: FlowerAnnotationOverlayProps) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
   return (
@@ -52,10 +53,10 @@ export default function FlowerAnnotationOverlay({ annotations }: FlowerAnnotatio
               key={i}
               onClick={() => setActiveIdx(activeIdx === i ? null : i)}
               style={{
-                cursor: 'pointer',
-                pointerEvents: 'all',
-                opacity: 0,
-                animation: `fadeInDot 0.4s ease ${i * 0.1}s forwards`,
+                cursor: forExport ? 'default' : 'pointer',
+                pointerEvents: forExport ? 'none' : 'all',
+                opacity: forExport ? 1 : 0,
+                animation: forExport ? 'none' : `fadeInDot 0.4s ease ${i * 0.1}s forwards`,
               }}
             >
               {/* Outer glow */}
