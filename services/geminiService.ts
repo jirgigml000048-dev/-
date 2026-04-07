@@ -56,18 +56,13 @@ ${PURCHASE_LIST_SCHEMA}`;
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
     contents: prompt,
-    config: { responseMimeType: 'application/json' },
   });
 
-  const text = response.text || '{}';
-  try {
-    return JSON.parse(text) as PurchaseList;
-  } catch {
-    // Fallback: try to extract JSON from the response
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]) as PurchaseList;
-    throw new Error('Failed to parse Gemini response');
-  }
+  const text = response.text ?? '';
+  // Extract JSON from response
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error(`Gemini returned no JSON. Raw: ${text.slice(0, 200)}`);
+  return JSON.parse(match[0]) as PurchaseList;
 }
 
 export async function identifyFlowersFromImage(
@@ -100,15 +95,10 @@ ${PURCHASE_LIST_SCHEMA}`;
         ],
       },
     ],
-    config: { responseMimeType: 'application/json' },
   });
 
-  const text = response.text || '{}';
-  try {
-    return JSON.parse(text) as PurchaseList;
-  } catch {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]) as PurchaseList;
-    throw new Error('Failed to parse Gemini response');
-  }
+  const text = response.text ?? '';
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error(`Gemini returned no JSON. Raw: ${text.slice(0, 200)}`);
+  return JSON.parse(match[0]) as PurchaseList;
 }

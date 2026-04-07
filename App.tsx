@@ -54,7 +54,8 @@ export default function App() {
       setSelectedPhoto(photos[0]);
       setStyleStep('gallery');
     } catch (err) {
-      setError('AI 推荐失败，请检查网络后重试。');
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`推荐失败：${msg}`);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -77,7 +78,8 @@ export default function App() {
       setPurchaseList(list);
       setIdentifyStep('result');
     } catch (err) {
-      setError('识别失败，请确保上传清晰的花束照片后重试。');
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`识别失败：${msg}`);
       console.error(err);
     } finally {
       setIsLoading(false);
