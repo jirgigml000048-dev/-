@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { FlowerStyle, FlowerOccasion, BouquetSize, FlowerColor, MainFlower, FlowerSeason, StyleSelections } from '../types';
-import { STYLE_COVER_IMAGES } from '../constants/flowers';
+import { FlowerStyle, FlowerOccasion, BouquetSize, StyleSelections } from '../types';
+import { getUnsplashUrl, BOUQUET_PHOTO_IDS } from '../constants/flowers';
 
 const STYLES: FlowerStyle[] = ['现代简约', '浪漫唯美', '自然田园', '日式侘寂', '复古典雅'];
 const OCCASIONS: FlowerOccasion[] = ['爱情', '友情', '节日', '日常', '悼念'];
 const SIZES: BouquetSize[] = ['小型', '中型', '大型'];
-const COLORS: FlowerColor[] = ['白色系', '粉色系', '红色系', '紫色系', '黄橙系', '混色'];
-const MAIN_FLOWERS: MainFlower[] = ['玫瑰', '牡丹', '向日葵', '绣球', '郁金香', '雏菊', '满天星', '其他'];
-const SEASONS: FlowerSeason[] = ['春', '夏', '秋', '冬'];
 
 const STYLE_EN: Record<FlowerStyle, string> = {
   '现代简约': 'Modern',
@@ -40,11 +37,9 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
   const [style, setStyle] = useState<FlowerStyle>('浪漫唯美');
   const [occasion, setOccasion] = useState<FlowerOccasion>('爱情');
   const [size, setSize] = useState<BouquetSize>('中型');
-  const [color, setColor] = useState<FlowerColor | undefined>(undefined);
-  const [mainFlower, setMainFlower] = useState<MainFlower | undefined>(undefined);
-  const [season, setSeason] = useState<FlowerSeason | undefined>(undefined);
 
-  const coverImage = STYLE_COVER_IMAGES[style];
+  // Cover image changes with selected style
+  const coverPhotoId = BOUQUET_PHOTO_IDS[style][0];
 
   return (
     <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">
@@ -64,8 +59,8 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
       {/* Cover Preview */}
       <div className="relative w-full mb-12 h-64 rounded-xl overflow-hidden group">
         <img
-          key={coverImage}
-          src={coverImage}
+          key={coverPhotoId}
+          src={getUnsplashUrl(coverPhotoId, 800)}
           alt={style}
           className="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700"
         />
@@ -76,8 +71,6 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
           <h3 className="font-headline text-xl text-primary mt-1">{style}</h3>
           <p className="text-on-surface-variant text-xs mt-1 font-medium">
             {STYLE_EN[style]} · {occasion} · {size}
-            {color ? ` · ${color}` : ''}
-            {mainFlower ? ` · ${mainFlower}` : ''}
           </p>
         </div>
       </div>
@@ -158,117 +151,12 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
             ))}
           </div>
         </div>
-
-        {/* Color (optional) */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">颜色系</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">
-              Color
-            </span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
-            <button
-              onClick={() => setColor(undefined)}
-              className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                color === undefined
-                  ? 'bg-secondary text-white shadow-lg shadow-secondary/20'
-                  : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-              }`}
-            >
-              全部
-            </button>
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setColor(c === color ? undefined : c)}
-                className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                  color === c
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Flower (optional) */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">主花</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">
-              Flower
-            </span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
-            <button
-              onClick={() => setMainFlower(undefined)}
-              className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                mainFlower === undefined
-                  ? 'bg-secondary text-white shadow-lg shadow-secondary/20'
-                  : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-              }`}
-            >
-              全部
-            </button>
-            {MAIN_FLOWERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setMainFlower(f === mainFlower ? undefined : f)}
-                className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                  mainFlower === f
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Season (optional) */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">季节</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">
-              Season
-            </span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
-            <button
-              onClick={() => setSeason(undefined)}
-              className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                season === undefined
-                  ? 'bg-secondary text-white shadow-lg shadow-secondary/20'
-                  : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-              }`}
-            >
-              全部
-            </button>
-            {SEASONS.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSeason(s === season ? undefined : s)}
-                className={`px-6 py-3 rounded-full font-label text-sm whitespace-nowrap font-semibold transition-all ${
-                  season === s
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                    : 'bg-surface-container text-secondary hover:bg-surface-container-high'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Action Button */}
       <div className="mt-16">
         <button
-          onClick={() => onConfirm({ style, occasion, size, color, mainFlower, season })}
+          onClick={() => onConfirm({ style, occasion, size })}
           disabled={isLoading}
           className="w-full bg-primary text-on-primary font-headline text-lg py-5 rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-3 disabled:opacity-60"
         >

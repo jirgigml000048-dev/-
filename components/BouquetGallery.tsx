@@ -28,18 +28,16 @@ export default function BouquetGallery({
         <h2 className="font-headline text-4xl leading-tight text-primary">
           为你推荐的<br />植物美学空间
         </h2>
-        {purchaseList && (
-          <p className="text-secondary mt-3 font-label text-sm">
-            「{purchaseList.title}」· {selections.style} · {selections.occasion} · {selections.size}
-          </p>
-        )}
+        <p className="text-secondary mt-3 font-label text-sm">
+          {selections.style} · {selections.occasion} · {selections.size}
+        </p>
       </div>
 
       {/* 2x2 Staggered Grid */}
       <div className="grid grid-cols-2 gap-6 mb-16">
         {photos.slice(0, 4).map((photo, index) => {
           const isSelected = selected === index;
-          const isOffset = index === 1 || index === 3; // right column offset
+          const isOffset = index === 1 || index === 3;
           return (
             <div
               key={photo.id}
@@ -47,7 +45,7 @@ export default function BouquetGallery({
             >
               <button
                 onClick={() => setSelected(index)}
-                className={`relative aspect-[2/3] rounded-xl overflow-hidden transition-all duration-300 ${
+                className={`relative aspect-[3/4] rounded-xl overflow-hidden transition-all duration-300 ${
                   isSelected
                     ? 'ring-2 ring-primary ring-offset-4 ring-offset-surface'
                     : 'bg-surface-container-low'
@@ -91,11 +89,11 @@ export default function BouquetGallery({
       {/* Action Buttons */}
       <div className="flex flex-col gap-4">
         <button
-          onClick={() => onConfirm(photos[selected]?.url ?? '')}
+          onClick={() => onConfirm(photos[selected].url)}
           className="w-full bg-primary text-on-primary font-body font-semibold px-10 py-5 rounded-xl flex items-center justify-center gap-3 hover:bg-primary-container transition-colors shadow-lg shadow-primary/10"
         >
           <span className="material-symbols-outlined">shopping_basket</span>
-          <span>生成购买清单</span>
+          <span>就选这张，生成清单</span>
         </button>
         <button
           onClick={onBack}

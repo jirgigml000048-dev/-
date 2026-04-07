@@ -22,16 +22,31 @@ import LibraryPreview from './components/LibraryPreview';
 
 const isPreview = new URLSearchParams(window.location.search).has('preview');
 
+// Fetch a local image URL and return base64 + mimeType
+async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  const mimeType = blob.type || 'image/jpeg';
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target?.result as string;
+      resolve({ base64: dataUrl.split(',')[1], mimeType });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export default function App() {
   if (isPreview) return <LibraryPreview />;
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [styleStep, setStyleStep] = useState<StyleFlowStep>('select');
   const [identifyStep, setIdentifyStep] = useState<IdentifyFlowStep>('upload');
 
   const [selections, setSelections] = useState<StyleSelections>({
-    style: '浪漫唯美',
-    occasion: '爱情',
-    size: '中型',
+    style: '浪漫唯美', occasion: '爱情', size: '中型',
   });
   const [recommendedPhotos, setRecommendedPhotos] = useState<PhotoEntry[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string>('');
@@ -49,70 +64,69 @@ export default function App() {
     setError(null);
   }, []);
 
-  // Feature 1: style selected → Gemini → gallery
-  const handleStyleConfirm = useCallback(async (sel: StyleSelections) => {
+  // Feature 1: style selected → filter photos locally → gallery (no AI yet)
+  const handleStyleConfirm = useCallback((sel: StyleSelections) => {
     setSelections(sel);
-    setIsLoading(true);
-    setError(null);
-    try {
-      const list = await generateBouquetRecommendation(sel.style, sel.occasion, sel.size);
-      const photos = filterPhotos(sel, 4);
-      setPurchaseList(list);
-      setRecommendedPhotos(photos);
-      setSelectedPhoto(photos[0]?.url ?? '');
-      setStyleStep('gallery');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`推荐失败：${msg}`);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    const photos = filterPhotos(sel, 4);
+    setRecommendedPhotos(photos);
+    setSelectedPhoto(photos[0]?.url ?? '');
+    setPurchaseList(null);
+    setAnnotations(undefined);
+    setStyleStep('gallery');
   }, []);
 
-  // Feature 1: user picks photo → show purchase list
-  const handlePhotoConfirm = useCallback((photoUrl: string) => {
+  // Feature 1b: user picks photo → AI generates list + annotates in parallel
+  const handlePhotoConfirm = useCallback(async (photoUrl: string) => {
     setSelectedPhoto(photoUrl);
+    setAnnotations(undefined);
+    setPurchaseList(null);
     setStyleStep('purchase');
-  }, []);
-
-  // Feature 2: upload image → Gemini Vision → purchase list
-  const handleAnalyze = useCallback(async (image: UploadedImage) => {
-    setUploadedImage(image);
     setIsLoading(true);
-    setError(null);
-    try {
-      const list = await identifyFlowersFromImage(image.base64, image.mimeType);
-      setPurchaseList(list);
-      setIdentifyStep('result');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`识别失败：${msg}`);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const handleRequestAnnotation = useCallback(async () => {
-    if (!uploadedImage) return;
     setIsAnnotating(true);
     setError(null);
     try {
-      const result = await annotateFlowersInImage(uploadedImage.base64, uploadedImage.mimeType);
-      setAnnotations(result);
+      const { base64, mimeType } = await fetchImageAsBase64(photoUrl);
+      const [list, anns] = await Promise.all([
+        generateBouquetRecommendation(selections.style, selections.occasion, selections.size),
+        annotateFlowersInImage(base64, mimeType).catch(() => [] as FlowerAnnotation[]),
+      ]);
+      setPurchaseList(list);
+      setAnnotations(anns.length > 0 ? anns : undefined);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`标注失败：${msg}`);
+      setError(`生成失败：${err instanceof Error ? err.message : String(err)}`);
     } finally {
+      setIsLoading(false);
       setIsAnnotating(false);
     }
-  }, [uploadedImage]);
+  }, [selections]);
+
+  // Feature 2: upload → identify + annotate in parallel
+  const handleAnalyze = useCallback(async (image: UploadedImage) => {
+    setUploadedImage(image);
+    setIsLoading(true);
+    setAnnotations(undefined);
+    setError(null);
+    try {
+      // Run identify and annotate in parallel
+      const [list, anns] = await Promise.all([
+        identifyFlowersFromImage(image.base64, image.mimeType),
+        annotateFlowersInImage(image.base64, image.mimeType).catch(() => [] as FlowerAnnotation[]),
+      ]);
+      setPurchaseList(list);
+      setAnnotations(anns.length > 0 ? anns : undefined);
+      setIdentifyStep('result');
+    } catch (err) {
+      setError(`识别失败：${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const handleRedo = useCallback(() => {
     if (activeTab === 'style') {
       setStyleStep('select');
       setPurchaseList(null);
+      setAnnotations(undefined);
     } else {
       setIdentifyStep('upload');
       setUploadedImage(null);
@@ -135,15 +149,12 @@ export default function App() {
   }, [activeTab, styleStep, identifyStep]);
 
   const renderScreen = () => {
-    if (activeTab === 'home') {
-      return <HomeScreen onNavigate={handleTabChange} />;
-    }
+    if (activeTab === 'home') return <HomeScreen onNavigate={handleTabChange} />;
 
     if (activeTab === 'style') {
-      if (styleStep === 'select') {
+      if (styleStep === 'select')
         return <StyleSelector onConfirm={handleStyleConfirm} isLoading={isLoading} />;
-      }
-      if (styleStep === 'gallery') {
+      if (styleStep === 'gallery')
         return (
           <BouquetGallery
             selections={selections}
@@ -153,46 +164,45 @@ export default function App() {
             onBack={() => setStyleStep('select')}
           />
         );
-      }
-      if (styleStep === 'purchase' && purchaseList) {
+      if (styleStep === 'purchase')
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
             heroImageUrl={selectedPhoto}
             onRedo={handleRedo}
+            annotations={annotations}
+            isAnnotating={isAnnotating}
+            isLoading={isLoading}
           />
         );
-      }
     }
 
     if (activeTab === 'identify') {
-      if (identifyStep === 'upload') {
+      if (identifyStep === 'upload')
         return <PhotoUpload onAnalyze={handleAnalyze} isLoading={isLoading} />;
-      }
-      if (identifyStep === 'result' && purchaseList && uploadedImage) {
+      if (identifyStep === 'result' && purchaseList && uploadedImage)
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
             heroImageUrl={uploadedImage.previewUrl}
             onRedo={handleRedo}
             annotations={annotations}
-            onRequestAnnotation={handleRequestAnnotation}
             isAnnotating={isAnnotating}
           />
         );
-      }
     }
 
     if (activeTab === 'lists') {
-      if (purchaseList) {
+      if (purchaseList)
         return (
           <PurchaseListScreen
             purchaseList={purchaseList}
             heroImageUrl={selectedPhoto || uploadedImage?.previewUrl || ''}
             onRedo={handleRedo}
+            annotations={annotations}
+            isAnnotating={isAnnotating}
           />
         );
-      }
       return <HomeScreen onNavigate={handleTabChange} />;
     }
 
@@ -202,7 +212,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-surface text-on-surface">
       <TopAppBar showBack={showBack} onBack={handleBack} />
-
       {error && (
         <div className="fixed top-20 left-0 right-0 z-40 px-6 max-w-2xl mx-auto">
           <div className="bg-error-container text-on-error-container px-5 py-4 rounded-xl flex items-center gap-3 shadow-lg">
@@ -214,9 +223,7 @@ export default function App() {
           </div>
         </div>
       )}
-
       {renderScreen()}
-
       <BottomNav activeTab={activeTab} onChange={handleTabChange} />
     </div>
   );
