@@ -95,6 +95,7 @@ export default function PhotoUpload({ onAnalyze, isLoading }: PhotoUploadProps) 
                 onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
               >
                 选择照片
+                <span className="block text-[9px] uppercase tracking-[0.15em] opacity-50 font-label mt-0.5">Select Image</span>
               </button>
             </div>
           )}
@@ -140,6 +141,7 @@ export default function PhotoUpload({ onAnalyze, isLoading }: PhotoUploadProps) 
           ) : (
             <>
               <span>开始识别</span>
+              <span className="text-[10px] uppercase tracking-widest opacity-60 font-label">· Identify</span>
               <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
                 arrow_forward
               </span>

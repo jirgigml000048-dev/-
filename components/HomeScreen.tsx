@@ -45,6 +45,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
             <span className="material-symbols-outlined">palette</span>
           </div>
           <div>
+            <span className="font-label text-[9px] uppercase tracking-[0.2em] text-secondary/70 font-bold block mb-1">Style Curator</span>
             <h3 className="font-headline text-xl font-bold text-primary mb-1">风格推荐</h3>
             <p className="text-sm text-secondary font-label">寻找属于你的植物美学</p>
           </div>
@@ -58,6 +59,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
             <span className="material-symbols-outlined">center_focus_strong</span>
           </div>
           <div>
+            <span className="font-label text-[9px] uppercase tracking-[0.2em] text-white/50 font-bold block mb-1">Vision Lab</span>
             <h3 className="font-headline text-xl font-bold mb-1">拍照识别</h3>
             <p className="text-sm text-white/70 font-label">即刻洞察自然的秘密</p>
           </div>

@@ -30,6 +30,16 @@ const SIZE_EN: Record<BouquetSize, string> = {
   '大型': 'Large',
 };
 
+const COLOR_EN: Record<FlowerColor, string> = {
+  '白色系': 'White', '粉色系': 'Blush', '红色系': 'Crimson',
+  '紫色系': 'Violet', '黄橙系': 'Amber', '混色': 'Mixed',
+};
+
+const FLOWER_EN: Record<MainFlower, string> = {
+  '玫瑰': 'Rose', '牡丹': 'Peony', '向日葵': 'Sunflower',
+  '绣球': 'Hydrangea', '郁金香': 'Tulip', '雏菊': 'Daisy', '满天星': 'Gypsophila', '其他': 'Other',
+};
+
 interface StyleSelectorProps {
   onConfirm: (selections: StyleSelections) => void;
   isLoading: boolean;
@@ -81,7 +91,7 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
               <h3 className="font-headline text-lg text-white font-bold leading-tight">{style}</h3>
             </div>
             <p className="text-white/70 text-xs font-label font-medium pb-0.5">
-              {style} · {occasion} · {size}
+              {STYLE_EN[style]} · {OCCASION_EN[occasion]} · {SIZE_EN[size]}
             </p>
           </div>
         </div>
@@ -92,7 +102,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         {/* Style */}
         <div className="space-y-5">
           <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">风格</h4>
+            <div>
+              <h4 className="font-headline text-2xl text-primary leading-none">风格</h4>
+              <span className="font-label text-[9px] text-secondary tracking-[0.18em] uppercase mt-1 block opacity-60">Aesthetic Direction</span>
+            </div>
             <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Style</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
@@ -107,7 +120,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         {/* Occasion */}
         <div className="space-y-5">
           <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">场合</h4>
+            <div>
+              <h4 className="font-headline text-2xl text-primary leading-none">场合</h4>
+              <span className="font-label text-[9px] text-secondary tracking-[0.18em] uppercase mt-1 block opacity-60">Mood &amp; Intention</span>
+            </div>
             <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Occasion</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
@@ -122,7 +138,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         {/* Size */}
         <div className="space-y-5">
           <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">大小</h4>
+            <div>
+              <h4 className="font-headline text-2xl text-primary leading-none">大小</h4>
+              <span className="font-label text-[9px] text-secondary tracking-[0.18em] uppercase mt-1 block opacity-60">Volume &amp; Form</span>
+            </div>
             <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Proportions</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
@@ -137,16 +156,19 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         {/* Color (optional) */}
         <div className="space-y-5">
           <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">颜色系</h4>
+            <div>
+              <h4 className="font-headline text-2xl text-primary leading-none">颜色系</h4>
+              <span className="font-label text-[9px] text-secondary tracking-[0.18em] uppercase mt-1 block opacity-60">Chromatic Palette</span>
+            </div>
             <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Color</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             <button onClick={() => setColor(undefined)} className={chipClass(color === undefined)}>
-              全部
+              All
             </button>
             {COLORS.map((c) => (
               <button key={c} onClick={() => setColor(c)} className={chipClass(color === c)}>
-                {c}
+                {COLOR_EN[c]}
               </button>
             ))}
           </div>
@@ -155,16 +177,19 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         {/* Main Flower (optional) */}
         <div className="space-y-5">
           <div className="flex justify-between items-end">
-            <h4 className="font-headline text-2xl text-primary">主花</h4>
+            <div>
+              <h4 className="font-headline text-2xl text-primary leading-none">主花</h4>
+              <span className="font-label text-[9px] text-secondary tracking-[0.18em] uppercase mt-1 block opacity-60">Botanical Selection</span>
+            </div>
             <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Flower</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             <button onClick={() => setMainFlower(undefined)} className={chipClass(mainFlower === undefined)}>
-              全部
+              All
             </button>
             {MAIN_FLOWERS.map((f) => (
               <button key={f} onClick={() => setMainFlower(f)} className={chipClass(mainFlower === f)}>
-                {f}
+                {FLOWER_EN[f]}
               </button>
             ))}
           </div>

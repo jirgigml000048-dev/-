@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { StyleSelections, PurchaseList, PhotoEntry } from '../types';
+import { StyleSelections, PurchaseList, PhotoEntry, FlowerStyle, FlowerOccasion, BouquetSize } from '../types';
+
+const STYLE_EN: Record<FlowerStyle, string> = {
+  '现代简约': 'Modern', '浪漫唯美': 'Romantic', '自然田园': 'Nature',
+  '日式侘寂': 'Wabi-sabi', '复古典雅': 'Classic',
+};
+const OCCASION_EN: Record<FlowerOccasion, string> = {
+  '爱情': 'Love', '友情': 'Friendship', '节日': 'Holiday', '日常': 'Daily', '悼念': 'Memorial',
+};
+const SIZE_EN: Record<BouquetSize, string> = {
+  '小型': 'Small', '中型': 'Medium', '大型': 'Large',
+};
 
 interface BouquetGalleryProps {
   selections: StyleSelections;
@@ -28,8 +39,11 @@ export default function BouquetGallery({
         <h2 className="font-headline text-4xl leading-tight text-primary max-w-[10em]">
           为你推荐的植物美学空间
         </h2>
+        <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary/60 mt-2 font-semibold">
+          Botanical Aesthetic Space
+        </p>
         <p className="text-secondary mt-3 font-label text-sm">
-          {selections.style} · {selections.occasion} · {selections.size}
+          {STYLE_EN[selections.style]} · {OCCASION_EN[selections.occasion]} · {SIZE_EN[selections.size]}
         </p>
       </div>
 
