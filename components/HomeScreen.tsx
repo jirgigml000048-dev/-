@@ -20,7 +20,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
           </span>
           <h2 className="font-headline text-3xl mt-2 text-primary font-bold">今日推荐：{todayPhoto.name}</h2>
         </div>
-        <div className="relative overflow-hidden rounded-xl aspect-[4/5] md:aspect-video group">
+        <div className="relative overflow-hidden rounded-xl aspect-[3/4] group">
           <img
             src={todayPhoto.url}
             alt={todayPhoto.name}
