@@ -1,6 +1,9 @@
 import React from 'react';
 import { ActiveTab } from '../types';
-import { FEATURED_IMAGE, COLLECTION_ITEMS } from '../constants/flowers';
+import { COLLECTION_ITEMS } from '../constants/flowers';
+import { PHOTO_LIBRARY } from '../constants/photoLibrary';
+
+const todayPhoto = PHOTO_LIBRARY[Math.floor(Date.now() / 86400000) % PHOTO_LIBRARY.length];
 
 interface HomeScreenProps {
   onNavigate: (tab: ActiveTab) => void;
@@ -15,19 +18,18 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
           <span className="font-label text-secondary text-xs uppercase tracking-widest font-semibold">
             Specimen of the Day
           </span>
-          <h2 className="font-headline text-3xl mt-2 text-primary font-bold">今日推荐：晨露牡丹</h2>
+          <h2 className="font-headline text-3xl mt-2 text-primary font-bold">今日推荐：{todayPhoto.name}</h2>
         </div>
         <div className="relative overflow-hidden rounded-xl aspect-[4/5] md:aspect-video group">
           <img
-            src={FEATURED_IMAGE}
-            alt="今日推荐花束"
+            src={todayPhoto.url}
+            alt={todayPhoto.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
           <div className="absolute bottom-0 left-0 p-8 text-white">
             <p className="font-headline text-lg italic leading-relaxed opacity-90 max-w-xs">
-              「唯有牡丹真国色，花开时节动京城。」<br />
-              晨曦微露，花瓣轻颤，记录那一抹稍纵即逝的灵动。
+              {todayPhoto.name}
             </p>
           </div>
         </div>

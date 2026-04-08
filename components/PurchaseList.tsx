@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { PurchaseList as PurchaseListType, FlowerAnnotation } from '../types';
 import FlowerAnnotationOverlay from './FlowerAnnotation';
 import { buildExportImage } from '../utils/buildExportImage';
+import { encodeShare } from '../utils/shareUtils';
 
 interface PurchaseListProps {
   purchaseList: PurchaseListType | null;
@@ -23,6 +24,7 @@ export default function PurchaseList({
   const [exportWithAnnotation, setExportWithAnnotation] = useState(true);
   const [expandedAlts, setExpandedAlts] = useState<Set<number>>(new Set());
   const [heroDataUrl, setHeroDataUrl] = useState(heroImageUrl);
+  const [shareToast, setShareToast] = useState(false);
 
   // Pre-load hero image as base64 data URL so html-to-image can capture it
   useEffect(() => {
@@ -64,6 +66,27 @@ export default function PurchaseList({
     }
   };
 
+  const handleShareLink = async () => {
+    if (!purchaseList) return;
+    const encoded = encodeShare(purchaseList);
+    const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `植觉·${purchaseList.title}`,
+          text: `来看看我的花束清单「${purchaseList.title}」`,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareToast(true);
+        setTimeout(() => setShareToast(false), 2500);
+      }
+    } catch {
+      // user cancelled share or clipboard not available
+    }
+  };
+
   const toggleAlt = (i: number) => {
     setExpandedAlts(prev => {
       const next = new Set(prev);
@@ -93,6 +116,13 @@ export default function PurchaseList({
 
   return (
     <main className="pt-24 px-6 max-w-2xl mx-auto pb-32">
+
+      {/* Share link toast */}
+      {shareToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-on-surface text-surface text-sm font-label font-semibold px-5 py-3 rounded-full shadow-lg pointer-events-none">
+          链接已复制
+        </div>
+      )}
 
       {/* Export modal */}
       {exportDataUrl && (
@@ -325,6 +355,13 @@ export default function PurchaseList({
           ) : (
             <><span className="material-symbols-outlined">ios_share</span>生成分享图</>
           )}
+        </button>
+        <button
+          onClick={handleShareLink}
+          className="w-full py-4 border border-outline-variant/20 text-secondary rounded-2xl font-label font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+        >
+          <span className="material-symbols-outlined text-sm">link</span>
+          分享链接
         </button>
         <button
           onClick={onRedo}

@@ -12,6 +12,7 @@ import {
 import { identifyFlowersFromImage, annotateFlowersInImage } from './services/geminiService';
 import { getPhotoCache, setPhotoCache } from './utils/supabaseCache';
 import { filterPhotos } from './constants/photoLibrary';
+import { decodeShare } from './utils/shareUtils';
 import TopAppBar from './components/TopAppBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
@@ -74,8 +75,21 @@ export default function App() {
   const [annotations, setAnnotations] = useState<FlowerAnnotation[] | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
-  // Restore last purchase list on mount
+  // Restore from ?share= param (shared link) or last saved list
   useEffect(() => {
+    const shareParam = new URLSearchParams(window.location.search).get('share');
+    if (shareParam) {
+      try {
+        const list = decodeShare(shareParam) as PurchaseList;
+        setPurchaseList(list);
+        setActiveTab('lists');
+        setStyleStep('purchase');
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch {
+        // malformed share param — ignore
+      }
+      return;
+    }
     const last = loadLastList();
     if (last) {
       setPurchaseList(last.purchaseList);

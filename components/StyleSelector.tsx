@@ -72,14 +72,18 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
           alt={style}
           className="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700"
         />
-        <div className="absolute bottom-6 right-6 bg-surface-container-highest p-5 rounded-lg max-w-[220px] shadow-sm">
-          <span className="font-label text-secondary text-[10px] uppercase tracking-widest font-bold">
-            Selected Style
-          </span>
-          <h3 className="font-headline text-xl text-primary mt-1">{style}</h3>
-          <p className="text-on-surface-variant text-xs mt-1 font-medium">
-            {STYLE_EN[style]} · {occasion} · {size}
-          </p>
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/55 to-transparent px-5 pb-5 pt-12">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-[9px] text-white/60 uppercase tracking-[0.2em] font-label font-semibold mb-0.5">
+                Selected Style
+              </p>
+              <h3 className="font-headline text-lg text-white font-bold leading-tight">{style}</h3>
+            </div>
+            <p className="text-white/70 text-xs font-label font-medium pb-0.5">
+              {STYLE_EN[style]} · {occasion} · {size}
+            </p>
+          </div>
         </div>
       </div>
 

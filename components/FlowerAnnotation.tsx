@@ -20,6 +20,32 @@ const PALETTE = [
 export default function FlowerAnnotationOverlay({ annotations, forExport = false }: FlowerAnnotationOverlayProps) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
+  // Pre-compute raw positions: push labels toward nearest image edge (empty background)
+  const rawPos = annotations.map((ann) => {
+    const [y1, x1, y2, x2] = ann.box_2d;
+    const cx = (x1 + x2) / 2;
+    const cy = (y1 + y2) / 2;
+    const toLeft = cx < 500;
+    return { cx, cy, toLeft, lx: toLeft ? 100 : 900, ly: cy };
+  });
+
+  // Collision avoidance per side: sort by y, push overlapping labels apart
+  const MIN_GAP = 54;
+  for (const isLeft of [true, false]) {
+    const group = rawPos
+      .map((p, i) => ({ ...p, i }))
+      .filter((p) => p.toLeft === isLeft)
+      .sort((a, b) => a.ly - b.ly);
+    for (let j = 1; j < group.length; j++) {
+      if (group[j].ly - group[j - 1].ly < MIN_GAP) {
+        group[j].ly = group[j - 1].ly + MIN_GAP;
+      }
+      rawPos[group[j].i].ly = group[j].ly;
+    }
+  }
+  // Clamp to safe SVG range
+  rawPos.forEach((p) => { p.ly = Math.max(50, Math.min(p.ly, 950)); });
+
   return (
     <>
       <style>{`
@@ -35,17 +61,9 @@ export default function FlowerAnnotationOverlay({ annotations, forExport = false
         style={{ pointerEvents: 'none' }}
       >
         {annotations.map((ann, i) => {
-          const [y1, x1, y2, x2] = ann.box_2d;
-          const cx = (x1 + x2) / 2;
-          const cy = (y1 + y2) / 2;
+          const { cx, cy, lx, ly } = rawPos[i];
           const c = PALETTE[i % PALETTE.length];
           const isActive = activeIdx === i;
-
-          // Push label away from center with longer lines
-          const toRight = cx < 500;
-          const toBottom = cy < 500;
-          const lx = toRight ? Math.min(cx + 220, 920) : Math.max(cx - 220, 80);
-          const ly = toBottom ? Math.min(cy + 100, 950) : Math.max(cy - 100, 50);
           const labelW = ann.label.length * 20 + 32;
 
           return (
@@ -65,7 +83,7 @@ export default function FlowerAnnotationOverlay({ annotations, forExport = false
               <circle cx={cx} cy={cy} r={isActive ? 16 : 11} fill={c.dot} opacity={0.95} />
               {/* Inner white core */}
               <circle cx={cx} cy={cy} r={5} fill="white" opacity={0.9} />
-              {/* Dashed connector — longer */}
+              {/* Dashed connector — extends to edge margin */}
               <line
                 x1={cx} y1={cy} x2={lx} y2={ly}
                 stroke={c.dot}
@@ -73,22 +91,22 @@ export default function FlowerAnnotationOverlay({ annotations, forExport = false
                 strokeDasharray="6 4"
                 opacity={0.85}
               />
-              {/* Label pill */}
+              {/* Label pill — centered at lx */}
               <rect
-                x={toRight ? lx - 4 : lx - labelW + 4}
+                x={lx - labelW / 2}
                 y={ly - 20}
                 width={labelW}
                 height={40}
                 rx={20}
-                fill={isActive ? c.dot : 'rgba(0,0,0,0.55)'}
+                fill={isActive ? c.dot : 'rgba(255,255,255,0.88)'}
                 stroke={c.dot}
                 strokeWidth={1.5}
               />
               <text
-                x={toRight ? lx + labelW / 2 - 4 : lx - labelW / 2 + 4}
+                x={lx}
                 y={ly + 1}
-                fill={isActive ? 'white' : c.dot}
-                fontSize="24"
+                fill={isActive ? 'white' : c.label}
+                fontSize="22"
                 fontWeight="700"
                 fontFamily="'PingFang SC', 'Hiragino Sans GB', sans-serif"
                 textAnchor="middle"
