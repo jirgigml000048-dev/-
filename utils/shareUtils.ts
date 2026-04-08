@@ -1,4 +1,10 @@
 // Unicode-safe base64url encode/decode for sharing purchase lists via URL
+import { PurchaseList } from '../types';
+
+export interface SharePayload {
+  purchaseList: PurchaseList;
+  heroImageUrl?: string; // only included when it's a path URL, not a base64 data URL
+}
 
 export function encodeShare(obj: unknown): string {
   const bytes = new TextEncoder().encode(JSON.stringify(obj));

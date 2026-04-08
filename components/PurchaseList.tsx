@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { PurchaseList as PurchaseListType, FlowerAnnotation } from '../types';
 import FlowerAnnotationOverlay from './FlowerAnnotation';
 import { buildExportImage } from '../utils/buildExportImage';
-import { encodeShare } from '../utils/shareUtils';
+import { encodeShare, SharePayload } from '../utils/shareUtils';
 
 interface PurchaseListProps {
   purchaseList: PurchaseListType | null;
@@ -68,7 +68,11 @@ export default function PurchaseList({
 
   const handleShareLink = async () => {
     if (!purchaseList) return;
-    const encoded = encodeShare(purchaseList);
+    const payload: SharePayload = {
+      purchaseList,
+      ...(heroImageUrl && !heroImageUrl.startsWith('data:') ? { heroImageUrl } : {}),
+    };
+    const encoded = encodeShare(payload);
     const url = `${window.location.origin}${window.location.pathname}?share=${encoded}`;
     try {
       if (navigator.share) {
@@ -175,6 +179,7 @@ export default function PurchaseList({
         </section>
 
         {/* Hero Image */}
+        {heroDataUrl && (
         <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden mb-14">
           <img
             src={heroDataUrl}
@@ -224,6 +229,7 @@ export default function PurchaseList({
             </button>
           )}
         </div>
+        )}
 
         {/* Flower List */}
         <section className="mb-14">

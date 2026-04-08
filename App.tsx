@@ -12,7 +12,7 @@ import {
 import { identifyFlowersFromImage, annotateFlowersInImage } from './services/geminiService';
 import { getPhotoCache, setPhotoCache } from './utils/supabaseCache';
 import { filterPhotos } from './constants/photoLibrary';
-import { decodeShare } from './utils/shareUtils';
+import { decodeShare, SharePayload } from './utils/shareUtils';
 import TopAppBar from './components/TopAppBar';
 import BottomNav from './components/BottomNav';
 import HomeScreen from './components/HomeScreen';
@@ -80,10 +80,12 @@ export default function App() {
     const shareParam = new URLSearchParams(window.location.search).get('share');
     if (shareParam) {
       try {
-        const list = decodeShare(shareParam) as PurchaseList;
+        const decoded = decodeShare(shareParam) as SharePayload;
+        // Support both new SharePayload format and legacy plain PurchaseList
+        const list = decoded.purchaseList ?? (decoded as unknown as PurchaseList);
         setPurchaseList(list);
+        if (decoded.heroImageUrl) setSelectedPhoto(decoded.heroImageUrl);
         setActiveTab('lists');
-        setStyleStep('purchase');
         window.history.replaceState({}, '', window.location.pathname);
       } catch {
         // malformed share param — ignore
