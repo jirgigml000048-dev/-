@@ -15,7 +15,7 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
       {/* Editorial Section: Today's Recommendation */}
       <section className="mb-12">
         <div className="mb-4">
-          <span className="font-label text-secondary text-xs uppercase tracking-widest font-semibold">
+          <span className="font-label text-secondary text-xs uppercase tracking-widest font-semibold mb-2 block">
             Specimen of the Day
           </span>
           <h2 className="font-headline text-3xl mt-2 text-primary font-bold">今日推荐：{todayPhoto.name}</h2>

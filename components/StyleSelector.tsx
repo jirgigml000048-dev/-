@@ -81,7 +81,7 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
               <h3 className="font-headline text-lg text-white font-bold leading-tight">{style}</h3>
             </div>
             <p className="text-white/70 text-xs font-label font-medium pb-0.5">
-              {STYLE_EN[style]} · {occasion} · {size}
+              {style} · {occasion} · {size}
             </p>
           </div>
         </div>
@@ -90,10 +90,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
       {/* Selection Chips */}
       <div className="space-y-10">
         {/* Style */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">风格</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Style</span>
+            <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Style</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             {STYLES.map((s) => (
@@ -105,10 +105,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         </div>
 
         {/* Occasion */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">场合</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Occasion</span>
+            <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Occasion</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             {OCCASIONS.map((o) => (
@@ -120,10 +120,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         </div>
 
         {/* Size */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">大小</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Proportions</span>
+            <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Proportions</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             {SIZES.map((sz) => (
@@ -135,10 +135,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         </div>
 
         {/* Color (optional) */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">颜色系</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Color</span>
+            <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Color</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             <button onClick={() => setColor(undefined)} className={chipClass(color === undefined)}>
@@ -153,10 +153,10 @@ export default function StyleSelector({ onConfirm, isLoading }: StyleSelectorPro
         </div>
 
         {/* Main Flower (optional) */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex justify-between items-end">
             <h4 className="font-headline text-2xl text-primary">主花</h4>
-            <span className="font-label text-[10px] text-secondary tracking-widest font-bold uppercase opacity-60">Flower</span>
+            <span className="font-label text-[10px] text-secondary tracking-[0.2em] font-bold uppercase opacity-50">Flower</span>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
             <button onClick={() => setMainFlower(undefined)} className={chipClass(mainFlower === undefined)}>

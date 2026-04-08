@@ -6,11 +6,11 @@ interface BottomNavProps {
   onChange: (tab: ActiveTab) => void;
 }
 
-const TABS: { id: ActiveTab; icon: string; label: string }[] = [
-  { id: 'home', icon: 'home', label: 'Home' },
-  { id: 'style', icon: 'palette', label: 'Style' },
-  { id: 'identify', icon: 'center_focus_strong', label: 'Identify' },
-  { id: 'lists', icon: 'potted_plant', label: 'Lists' },
+const TABS: { id: ActiveTab; icon: string; label: string; labelCN: string }[] = [
+  { id: 'home', icon: 'home', label: 'Home', labelCN: '首页' },
+  { id: 'style', icon: 'palette', label: 'Style', labelCN: '风格' },
+  { id: 'identify', icon: 'center_focus_strong', label: 'Identify', labelCN: '识花' },
+  { id: 'lists', icon: 'potted_plant', label: 'Lists', labelCN: '清单' },
 ];
 
 export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
@@ -34,8 +34,13 @@ export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
             >
               {tab.icon}
             </span>
-            <span className="font-label text-[10px] uppercase tracking-widest font-semibold mt-1">
-              {tab.label}
+            <span className="flex flex-col items-center mt-1 gap-px">
+              <span className="font-label text-[10px] uppercase tracking-widest font-semibold">
+                {tab.label}
+              </span>
+              <span className="font-headline text-[9px] font-bold leading-none">
+                {tab.labelCN}
+              </span>
             </span>
           </button>
         );

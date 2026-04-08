@@ -184,6 +184,141 @@ export const PHOTO_LIBRARY: PhotoEntry[] = [
     styles: ['现代简约', '复古典雅'], occasions: ['节日', '日常'],
     colors: ['红色系', '白色系'], mainFlowers: ['其他', '玫瑰'], season: '四季',
   },
+  {
+    id: 'p037', url: '/image/aleksandra-sapozhnikova-BbSJTw7wvWY-unsplash.jpg', name: '粉白晨语',
+    styles: ['浪漫唯美'], occasions: ['爱情', '节日'],
+    colors: ['粉色系', '白色系'], mainFlowers: ['牡丹', '其他'], season: '春',
+  },
+  {
+    id: 'p038', url: '/image/ben-kupke-C-WYqBHO41k-unsplash.jpg', name: '教堂野趣',
+    styles: ['自然田园'], occasions: ['节日', '悼念'],
+    colors: ['紫色系', '白色系'], mainFlowers: ['绣球', '其他'], season: '夏',
+  },
+  {
+    id: 'p039', url: '/image/broberta-pgW0cB9ALJ8-unsplash.jpg', name: '大厅盛放',
+    styles: ['现代简约', '浪漫唯美'], occasions: ['节日', '日常'],
+    colors: ['粉色系', '混色'], mainFlowers: ['玫瑰', '其他'], season: '四季',
+  },
+  {
+    id: 'p040', url: '/image/charlotte-cowell-SKnWrH1UJUQ-unsplash.jpg', name: '冬林幽境',
+    styles: ['复古典雅', '日式侘寂'], occasions: ['节日', '日常'],
+    colors: ['粉色系', '混色'], mainFlowers: ['其他'], season: '冬',
+  },
+  {
+    id: 'p041', url: '/image/emma-englund-a6nJ0aalg6A-unsplash.jpg', name: '木台野韵',
+    styles: ['现代简约', '自然田园'], occasions: ['日常', '爱情'],
+    colors: ['粉色系', '白色系'], mainFlowers: ['玫瑰', '郁金香', '其他'], season: '春',
+  },
+  {
+    id: 'p042', url: '/image/haydn-golden-LfT2t-E08kw-unsplash.jpg', name: '典雅百合颂',
+    styles: ['现代简约', '复古典雅'], occasions: ['节日', '友情'],
+    colors: ['白色系', '红色系'], mainFlowers: ['其他'], season: '四季',
+  },
+  {
+    id: 'p043', url: '/image/jiri-jancik-BWJU_Lvc17g-unsplash.jpg', name: '秋野紫颂',
+    styles: ['自然田园'], occasions: ['日常', '友情'],
+    colors: ['紫色系', '红色系'], mainFlowers: ['玫瑰', '其他'], season: '秋',
+  },
+  {
+    id: 'p044', url: '/image/joshua-soliz-R3GW7g70Krw-unsplash.jpg', name: '仲夏农庄',
+    styles: ['自然田园'], occasions: ['日常', '节日'],
+    colors: ['黄橙系', '混色'], mainFlowers: ['其他'], season: '夏',
+  },
+  {
+    id: 'p045', url: '/image/ky-nang-N0NMRb7M0GM-unsplash.jpg', name: '阳台繁盛',
+    styles: ['浪漫唯美'], occasions: ['爱情', '节日'],
+    colors: ['粉色系', '红色系'], mainFlowers: ['牡丹', '玫瑰'], season: '春',
+  },
+  {
+    id: 'p046', url: '/image/leonsa-B_-zIfuRqZI-unsplash.jpg', name: '书香花事',
+    styles: ['浪漫唯美', '现代简约'], occasions: ['友情', '日常'],
+    colors: ['紫色系', '粉色系'], mainFlowers: ['玫瑰', '其他'], season: '四季',
+  },
+  {
+    id: 'p047', url: '/image/liza-golyarchuk-Go0Dn7wbumQ-unsplash.jpg', name: '金秋野草',
+    styles: ['自然田园', '日式侘寂'], occasions: ['日常'],
+    colors: ['黄橙系'], mainFlowers: ['其他'], season: '秋',
+  },
+  {
+    id: 'p048', url: '/image/luisa-brimble-Ikcn0alusdg-unsplash.jpg', name: '暗夜繁花',
+    styles: ['复古典雅', '日式侘寂'], occasions: ['节日', '日常'],
+    colors: ['粉色系', '混色'], mainFlowers: ['其他'], season: '秋',
+  },
+  {
+    id: 'p049', url: '/image/marina-podrez-uGU9UblmvUM-unsplash.jpg', name: '春日阳光',
+    styles: ['现代简约', '自然田园'], occasions: ['节日', '友情'],
+    colors: ['黄橙系', '白色系'], mainFlowers: ['郁金香', '其他'], season: '春',
+  },
+  {
+    id: 'p050', url: '/image/morgane-le-breton-zXz692Yp3uw-unsplash.jpg', name: '野田雏菊',
+    styles: ['自然田园', '日式侘寂'], occasions: ['日常'],
+    colors: ['白色系', '黄橙系'], mainFlowers: ['雏菊'], season: '夏',
+  },
+  {
+    id: 'p051', url: '/image/neyda-torrelles-xmCGvuAr0O0-unsplash.jpg', name: '橙光窗台',
+    styles: ['现代简约'], occasions: ['日常'],
+    colors: ['黄橙系'], mainFlowers: ['郁金香'], season: '春',
+  },
+  {
+    id: 'p052', url: '/image/nicholas-susilo-DDGhQT_k4qE-unsplash.jpg', name: '华贵芍药',
+    styles: ['复古典雅', '浪漫唯美'], occasions: ['爱情', '节日'],
+    colors: ['红色系', '粉色系'], mainFlowers: ['牡丹', '玫瑰'], season: '春',
+  },
+  {
+    id: 'p053', url: '/image/nicolette-meade-yRzxybNzmDQ-unsplash.jpg', name: '暗夜玫情',
+    styles: ['复古典雅', '浪漫唯美'], occasions: ['爱情'],
+    colors: ['白色系', '粉色系'], mainFlowers: ['玫瑰', '其他'], season: '四季',
+  },
+  {
+    id: 'p054', url: '/image/oriento-AWkMRde9BmU-unsplash.jpg', name: '禅意兰枝',
+    styles: ['日式侘寂', '现代简约'], occasions: ['日常'],
+    colors: ['白色系'], mainFlowers: ['其他'], season: '四季',
+  },
+  {
+    id: 'p055', url: '/image/rimsha-noor-R6LPDM16BIc-unsplash.jpg', name: '粉云盛宴',
+    styles: ['浪漫唯美'], occasions: ['爱情', '节日'],
+    colors: ['粉色系'], mainFlowers: ['玫瑰', '其他'], season: '夏',
+  },
+  {
+    id: 'p056', url: '/image/simon-godfrey-7y6kMPKxqhg-unsplash.jpg', name: '野园百色',
+    styles: ['自然田园'], occasions: ['友情', '日常'],
+    colors: ['混色'], mainFlowers: ['玫瑰', '其他'], season: '春',
+  },
+  {
+    id: 'p057', url: '/image/stephanie-klepacki-7JmvK5BJG-E-unsplash.jpg', name: '缤纷抱束',
+    styles: ['浪漫唯美', '自然田园'], occasions: ['节日', '友情'],
+    colors: ['粉色系', '红色系'], mainFlowers: ['其他'], season: '秋',
+  },
+  {
+    id: 'p058', url: '/image/stephanie-klepacki-c3h_3hjnXMg-unsplash.jpg', name: '秋日工坊',
+    styles: ['自然田园', '复古典雅'], occasions: ['日常', '友情'],
+    colors: ['黄橙系', '粉色系'], mainFlowers: ['玫瑰', '其他'], season: '秋',
+  },
+  {
+    id: 'p059', url: '/image/suo-wein-wWykQsDzNIA-unsplash.jpg', name: '婚礼颂词',
+    styles: ['现代简约', '浪漫唯美'], occasions: ['爱情', '节日'],
+    colors: ['白色系', '粉色系'], mainFlowers: ['绣球', '玫瑰'], season: '四季',
+  },
+  {
+    id: 'p060', url: '/image/szobota-zsuzsi-jUxDD3_9iSk-unsplash.jpg', name: '暗紫幽境',
+    styles: ['复古典雅', '日式侘寂'], occasions: ['日常'],
+    colors: ['紫色系', '白色系'], mainFlowers: ['绣球', '其他'], season: '春',
+  },
+  {
+    id: 'p061', url: '/image/t-KVswRSRMa9s-unsplash.jpg', name: '粉彩捧花',
+    styles: ['浪漫唯美'], occasions: ['爱情', '友情'],
+    colors: ['粉色系', '混色'], mainFlowers: ['绣球', '其他'], season: '四季',
+  },
+  {
+    id: 'p062', url: '/image/trac-vu-tD8vyvG7yBw-unsplash.jpg', name: '秋暖农趣',
+    styles: ['自然田园', '复古典雅'], occasions: ['日常', '节日'],
+    colors: ['黄橙系', '粉色系'], mainFlowers: ['玫瑰', '其他'], season: '秋',
+  },
+  {
+    id: 'p063', url: '/image/virginia-long-xFhZWy-toT8-unsplash.jpg', name: '紫园古典',
+    styles: ['复古典雅'], occasions: ['节日', '日常'],
+    colors: ['紫色系', '白色系'], mainFlowers: ['绣球', '其他'], season: '四季',
+  },
 ];
 
 // ── Shuffle helper ────────────────────────────────────────────────────────────

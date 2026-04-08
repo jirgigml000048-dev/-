@@ -229,7 +229,7 @@ export default function PurchaseList({
         <section className="mb-14">
           <div className="flex items-baseline justify-between mb-8">
             <h3 className="font-headline text-3xl text-primary">花材清单</h3>
-            <span className="text-secondary text-xs font-label uppercase tracking-widest opacity-60">Ingredients</span>
+            <span className="text-secondary text-[10px] font-label uppercase tracking-[0.2em] font-bold opacity-50">Ingredients</span>
           </div>
           <div>
             {purchaseList.flowers.map((flower, i) => (

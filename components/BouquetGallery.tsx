@@ -25,8 +25,8 @@ export default function BouquetGallery({
         <p className="font-label text-secondary uppercase tracking-widest text-[10px] mb-2 font-bold">
           Curated Selection
         </p>
-        <h2 className="font-headline text-4xl leading-tight text-primary">
-          为你推荐的<br />植物美学空间
+        <h2 className="font-headline text-4xl leading-tight text-primary max-w-[10em]">
+          为你推荐的植物美学空间
         </h2>
         <p className="text-secondary mt-3 font-label text-sm">
           {selections.style} · {selections.occasion} · {selections.size}
