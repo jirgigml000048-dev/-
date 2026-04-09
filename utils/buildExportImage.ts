@@ -1,8 +1,15 @@
 import { PurchaseList, FlowerAnnotation } from '../types';
 
+// Matches FlowerAnnotation.tsx PALETTE exactly
 const PALETTE = [
-  '#F9A8D4', '#93C5FD', '#86EFAC', '#FCD34D',
-  '#C4B5FD', '#6EE7B7', '#FCA5A5', '#A5F3FC',
+  { dot: '#F9A8D4', label: '#BE185D' },
+  { dot: '#93C5FD', label: '#1D4ED8' },
+  { dot: '#86EFAC', label: '#15803D' },
+  { dot: '#FCD34D', label: '#B45309' },
+  { dot: '#C4B5FD', label: '#6D28D9' },
+  { dot: '#6EE7B7', label: '#065F46' },
+  { dot: '#FCA5A5', label: '#B91C1C' },
+  { dot: '#A5F3FC', label: '#0E7490' },
 ];
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -72,48 +79,71 @@ function drawAnnotations(
   annotations: FlowerAnnotation[],
   imgX: number, imgY: number, imgW: number, imgH: number,
 ) {
-  annotations.forEach((ann, i) => {
+  // === Same edge-push + collision-avoidance algorithm as FlowerAnnotation.tsx ===
+
+  // 1. Raw positions: push label anchor to nearest image edge (10% or 90%)
+  const rawPos = annotations.map(ann => {
     const [y1, x1, y2, x2] = ann.box_2d;
     const cx = imgX + ((x1 + x2) / 2 / 1000) * imgW;
     const cy = imgY + ((y1 + y2) / 2 / 1000) * imgH;
-    const color = PALETTE[i % PALETTE.length];
+    const toLeft = (x1 + x2) / 2 < 500;
+    return { cx, cy, toLeft, lx: imgX + (toLeft ? 0.1 : 0.9) * imgW, ly: cy };
+  });
 
-    const toRight  = (x1 + x2) / 2 < 500;
-    const toBottom = (y1 + y2) / 2 < 500;
-    const lx = cx + (toRight ? 70 : -70);
-    const ly = cy + (toBottom ? 36 : -36);
+  // 2. Collision avoidance per side (MIN_GAP mirrors SVG's 54/1000 ratio)
+  const MIN_GAP = 0.054 * imgH;
+  for (const isLeft of [true, false]) {
+    const group = rawPos
+      .map((p, i) => ({ ...p, i }))
+      .filter(p => p.toLeft === isLeft)
+      .sort((a, b) => a.ly - b.ly);
+    for (let j = 1; j < group.length; j++) {
+      if (group[j].ly - group[j - 1].ly < MIN_GAP) {
+        group[j].ly = group[j - 1].ly + MIN_GAP;
+      }
+      rawPos[group[j].i].ly = group[j].ly;
+    }
+  }
+
+  // 3. Clamp to 5%–95% of image height (mirrors SVG's clamp to [50,950])
+  rawPos.forEach(p => {
+    p.ly = Math.max(imgY + 0.05 * imgH, Math.min(p.ly, imgY + 0.95 * imgH));
+  });
+
+  // 4. Draw each annotation
+  rawPos.forEach(({ cx, cy, lx, ly }, i) => {
+    const c = PALETTE[i % PALETTE.length];
 
     // Glow
     ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2);
-    ctx.fillStyle = color + '44'; ctx.fill();
+    ctx.fillStyle = c.dot + '44'; ctx.fill();
 
     // Dot
     ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color; ctx.fill();
+    ctx.fillStyle = c.dot; ctx.fill();
 
     // White core
     ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI * 2);
     ctx.fillStyle = 'white'; ctx.fill();
 
-    // Dashed line
+    // Dashed connector line
     ctx.save();
     ctx.setLineDash([3, 2]);
     ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(lx, ly);
-    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = c.dot; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.restore();
 
-    // Label pill
+    // Label pill — centered at lx (matches SVG rect x={lx - labelW/2})
     ctx.font = 'bold 10px "PingFang SC","Noto Sans SC",sans-serif';
-    const tw = ctx.measureText(ann.label).width;
+    const tw = ctx.measureText(annotations[i].label).width;
     const pillW = tw + 16;
-    const pillX = toRight ? lx - 4 : lx - pillW + 4;
 
-    rrect(ctx, pillX, ly - 10, pillW, 20, 10);
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fill();
-    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();
+    rrect(ctx, lx - pillW / 2, ly - 10, pillW, 20, 10);
+    ctx.fillStyle = 'rgba(255,255,255,0.88)'; ctx.fill();
+    ctx.strokeStyle = c.dot; ctx.lineWidth = 1.5; ctx.stroke();
 
-    ctx.fillStyle = color; ctx.textAlign = 'center';
-    ctx.fillText(ann.label, pillX + pillW / 2, ly + 4);
+    ctx.fillStyle = c.label; ctx.textAlign = 'center';
+    ctx.fillText(annotations[i].label, lx, ly + 4);
     ctx.textAlign = 'left';
   });
 }
@@ -272,11 +302,11 @@ export async function buildExportImage(
     y += 16;
 
     flowers.forEach((f, i) => {
-      const color = PALETTE[i % PALETTE.length];
+      const c = PALETTE[i % PALETTE.length];
 
       // Colored dot
       ctx.beginPath(); ctx.arc(PH + 5, y + 8, 3, 0, Math.PI * 2);
-      ctx.fillStyle = color; ctx.fill();
+      ctx.fillStyle = c.dot; ctx.fill();
 
       // Flower name + color
       ctx.font = FONT_FLOWER; ctx.fillStyle = '#172f28';
