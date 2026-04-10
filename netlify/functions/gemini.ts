@@ -82,7 +82,7 @@ export async function handler(event: HandlerEvent): Promise<HandlerResponse> {
       const { base64, mimeType } = body;
       const prompt = `专业花艺师。分析花束照片，识别所有花卉品种（注意区分：玫瑰/芍药/牡丹、绣球/洋桔梗、雏菊/矢车菊），估算枝数比例，每种花提供1-2个备选。起诗意中文名，说明面向新手。严格返回JSON：\n${SCHEMA}`;
       const text = await callWithFallback(apiKey, [{
-        parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64 } }],
+        parts: [{ text: prompt }, { inlineData: { mimeType, data: base64 } }],
       }]);
       const match = text.match(/\{[\s\S]*\}/);
       if (!match) throw new Error(`No JSON in response: ${text.slice(0, 200)}`);
@@ -97,7 +97,7 @@ export async function handler(event: HandlerEvent): Promise<HandlerResponse> {
         : '识别图中每种花卉/植物。';
       const prompt = `${focus}每种一个框，label用简短中文花名。box_2d格式[y_min,x_min,y_max,x_max]范围0-1000。只返回JSON数组：[{"label":"花名","box_2d":[y1,x1,y2,x2]}]`;
       const text = await callWithFallback(apiKey, [{
-        parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64 } }],
+        parts: [{ text: prompt }, { inlineData: { mimeType, data: base64 } }],
       }]);
       const match = text.match(/\[[\s\S]*\]/);
       if (!match) throw new Error(`No JSON array in response: ${text.slice(0, 200)}`);
