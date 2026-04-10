@@ -9,11 +9,12 @@ const HEADERS = {
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 // Models tried in order; falls back on 429/503/404
+// Gemini 3 series — restored from original working config
 const MODELS = [
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
+  'gemini-3-flash-preview',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-flash-latest',
+  'gemini-3.1-pro-preview',
 ];
 
 async function generate(apiKey: string, model: string, contents: unknown[]): Promise<string> {
