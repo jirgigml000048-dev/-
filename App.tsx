@@ -42,19 +42,31 @@ function loadLastList(): { purchaseList: PurchaseList; selectedPhoto: string } |
   } catch { return null; }
 }
 
-// Fetch a local image URL and return base64 + mimeType
+// Fetch a local image URL, resize to max 1024px, and return base64 + mimeType.
+// Resizing keeps the payload well under Netlify Functions' 6 MB request body limit.
 async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
   const res = await fetch(url);
   const blob = await res.blob();
-  const mimeType = blob.type || 'image/jpeg';
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target?.result as string;
-      resolve({ base64: dataUrl.split(',')[1], mimeType });
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(blob);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX = 1024;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width >= height) { height = Math.round(height * MAX / width); width = MAX; }
+        else { width = Math.round(width * MAX / height); height = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+    img.onerror = reject;
+    img.src = objectUrl;
   });
 }
 
