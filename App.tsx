@@ -189,6 +189,24 @@ export default function App() {
     }
   }, []);
 
+  // Home screen banner click → fetch image and jump straight to identify result
+  const handleHomePhotoClick = useCallback(async (photoUrl: string) => {
+    setActiveTab('identify');
+    setIdentifyStep('upload');
+    setIsLoading(true);
+    setAnnotations(undefined);
+    setPurchaseList(null);
+    setError(null);
+    try {
+      const { base64, mimeType } = await fetchImageAsBase64(photoUrl);
+      const img: UploadedImage = { base64, mimeType, previewUrl: photoUrl };
+      handleAnalyze(img);
+    } catch {
+      setIsLoading(false);
+      setError('加载图片失败，请重试');
+    }
+  }, [handleAnalyze]);
+
   const handleRedo = useCallback(() => {
     if (activeTab === 'style') {
       setStyleStep('select');
@@ -216,7 +234,7 @@ export default function App() {
   }, [activeTab, styleStep, identifyStep]);
 
   const renderScreen = () => {
-    if (activeTab === 'home') return <HomeScreen onNavigate={handleTabChange} />;
+    if (activeTab === 'home') return <HomeScreen onNavigate={handleTabChange} onPhotoClick={handleHomePhotoClick} />;
 
     if (activeTab === 'style') {
       if (styleStep === 'select')

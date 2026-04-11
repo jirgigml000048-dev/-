@@ -3,13 +3,15 @@ import { ActiveTab } from '../types';
 import { COLLECTION_ITEMS } from '../constants/flowers';
 import { PHOTO_LIBRARY } from '../constants/photoLibrary';
 
-const todayPhoto = PHOTO_LIBRARY[Math.floor(Date.now() / 86400000) % PHOTO_LIBRARY.length];
+// Offset 28: launch day (2026-04-11) shows p045「阳台繁盛」(spring peony/rose), rotation continues normally
+const todayPhoto = PHOTO_LIBRARY[(Math.floor(Date.now() / 86400000) + 28) % PHOTO_LIBRARY.length];
 
 interface HomeScreenProps {
   onNavigate: (tab: ActiveTab) => void;
+  onPhotoClick?: (photoUrl: string) => void;
 }
 
-export default function HomeScreen({ onNavigate }: HomeScreenProps) {
+export default function HomeScreen({ onNavigate, onPhotoClick }: HomeScreenProps) {
   return (
     <main className="pt-24 px-6 max-w-screen-md mx-auto pb-32">
       {/* Editorial Section: Today's Recommendation */}
@@ -20,13 +22,21 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
           </span>
           <h2 className="font-headline text-3xl mt-2 text-primary font-bold">今日推荐：{todayPhoto.name}</h2>
         </div>
-        <div className="relative overflow-hidden rounded-xl aspect-[3/4] group">
+        <div
+          className="relative overflow-hidden rounded-xl aspect-[3/4] group cursor-pointer"
+          onClick={() => onPhotoClick?.(todayPhoto.url)}
+        >
           <img
             src={todayPhoto.url}
             alt={todayPhoto.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
+          {/* 始终可见的识花入口标签 */}
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-primary text-xs font-label font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-sm">center_focus_strong</span>
+            识别花材
+          </div>
           <div className="absolute bottom-0 left-0 p-8 text-white">
             <p className="font-headline text-lg italic leading-relaxed opacity-90 max-w-xs">
               {todayPhoto.name}
