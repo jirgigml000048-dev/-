@@ -8,13 +8,13 @@ const HEADERS = {
 
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-// Models tried in order; falls back on 429/503/404
-// Gemini 3 series — restored from original working config
+// Models tried in order; falls back on 400/404/429/503
 const MODELS = [
   'gemini-3-flash-preview',
+  'gemini-3.0-flash',
   'gemini-3.1-flash-lite-preview',
-  'gemini-flash-latest',
   'gemini-3.1-pro-preview',
+  'gemini-2.0-flash',
 ];
 
 async function generate(apiKey: string, model: string, contents: unknown[]): Promise<string> {
@@ -40,7 +40,7 @@ async function callWithFallback(apiKey: string, contents: unknown[]): Promise<st
       return await generate(apiKey, model, contents);
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
-      if (status === 429 || status === 503 || status === 404) {
+      if (status === 400 || status === 404 || status === 429 || status === 503) {
         lastErr = err;
         continue;
       }
