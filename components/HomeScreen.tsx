@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActiveTab } from '../types';
+import { ActiveTab, PhotoEntry } from '../types';
 import { COLLECTION_ITEMS } from '../constants/flowers';
 import { PHOTO_LIBRARY } from '../constants/photoLibrary';
 
@@ -8,7 +8,7 @@ const todayPhoto = PHOTO_LIBRARY[(Math.floor(Date.now() / 86400000) + 60) % PHOT
 
 interface HomeScreenProps {
   onNavigate: (tab: ActiveTab) => void;
-  onPhotoClick?: (photoUrl: string) => void;
+  onPhotoClick?: (photo: PhotoEntry) => void;
 }
 
 export default function HomeScreen({ onNavigate, onPhotoClick }: HomeScreenProps) {
@@ -24,7 +24,7 @@ export default function HomeScreen({ onNavigate, onPhotoClick }: HomeScreenProps
         </div>
         <div
           className="relative overflow-hidden rounded-xl aspect-[3/4] group cursor-pointer"
-          onClick={() => onPhotoClick?.(todayPhoto.url)}
+          onClick={() => onPhotoClick?.(todayPhoto)}
         >
           <img
             src={todayPhoto.url}
