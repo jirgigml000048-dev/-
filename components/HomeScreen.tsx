@@ -3,8 +3,8 @@ import { ActiveTab } from '../types';
 import { COLLECTION_ITEMS } from '../constants/flowers';
 import { PHOTO_LIBRARY } from '../constants/photoLibrary';
 
-// Offset 28: launch day (2026-04-11) shows p045「阳台繁盛」(spring peony/rose), rotation continues normally
-const todayPhoto = PHOTO_LIBRARY[(Math.floor(Date.now() / 86400000) + 28) % PHOTO_LIBRARY.length];
+// Offset 60: launch day (2026-04-11) shows p014「秋门枯荣」(wabi-sabi autumn gate), rotation continues normally
+const todayPhoto = PHOTO_LIBRARY[(Math.floor(Date.now() / 86400000) + 60) % PHOTO_LIBRARY.length];
 
 interface HomeScreenProps {
   onNavigate: (tab: ActiveTab) => void;
